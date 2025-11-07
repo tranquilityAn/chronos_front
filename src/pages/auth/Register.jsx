@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import "../../styles/Register.css";
+// важное: используем тот же файл стилей, что и логин
+import "../../styles/Login.css";
 import { register } from "../../features/auth/authSlice";
 
 export default function Register() {
@@ -21,7 +22,8 @@ export default function Register() {
     }
     try {
       await dispatch(register({ email, password })).unwrap();
-      // если бэк сразу даёт токен — можно вести на главную, иначе на логин
+      // если после регистрации сразу выдаётся токен — можно вести на главную
+      // иначе поменяй на navigate("/login")
       navigate("/");
     } catch (err) {
       console.error(err);
@@ -29,56 +31,73 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="container">
+      <div className="header">
+        <label>Houdini</label>
+      </div>
 
-      <form onSubmit={onSubmit}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="you@domain.com"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+      <div className="container-main">
+        <div className="container-image"></div>
+
+        <div className="container-login">
+          <div className="container-second-color">
+            <h2>Sign up</h2>
+
+            <form onSubmit={onSubmit}>
+              <div className="container-input">
+                <label className="label-input">Email</label>
+                <input
+                  type="email"
+                  placeholder="you@domain.com"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="container-input">
+                <label className="label-input">Password</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="container-input">
+                <label className="label-input">Confirm password</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  autoComplete="new-password"
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                />
+                <label id="ny-eto">
+                  Already have an account?{" "}
+                  <Link to="/login">Sign in</Link>
+                </label>
+              </div>
+
+              <button type="submit" disabled={status === "loading"}>
+                {status === "loading" ? "Registering…" : "Register"}
+              </button>
+            </form>
+
+            {error && <p style={{ color: "crimson" }}>Ошибка: {error}</p>}
+
+            <label id="ne-eto">
+              By signing up, you agree to the{" "}
+              <a href="#">Terms</a>.
+            </label>
+          </div>
         </div>
-
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            required
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label>Confirm password</label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            required
-            autoComplete="new-password"
-            value={password2}
-            onChange={(e) => setPassword2(e.target.value)}
-          />
-        </div>
-
-        <button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Registering…" : "Register"}
-        </button>
-      </form>
-
-      {error && <p style={{ color: "crimson" }}>Ошибка: {error}</p>}
-
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
+      </div>
     </div>
   );
 }

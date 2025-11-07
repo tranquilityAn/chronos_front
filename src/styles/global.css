@@ -1,7 +1,17 @@
 html{
-  font-family: 'Inria Sans', sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
 }
+
 :root {
     --main-color:#1E1E1E;
     --second-color:#EDE986;
+    --alt-main-color:#2A2A2A;
+
+    --main-text-color:#F3F3F3;
+    --second-text-color:#A1A1A1;
+
+    --success-color:#7AC74F;
+    --error-color:#E86A5D;
+
+    --highlight:#F5F1B2;
 }
