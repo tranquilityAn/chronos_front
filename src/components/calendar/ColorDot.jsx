@@ -1,13 +1,11 @@
 export default function ColorDot({ color }) {
     return (
-        <span
+        <div
             style={{
-                display: "inline-block",
-                width: 12,
-                height: 12,
-                borderRadius: 9999,
-                backgroundColor: color,
-                marginRight: 8,
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: color || "#000",
             }}
         />
     );

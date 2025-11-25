@@ -1,35 +1,32 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CalendarToolbar from "../components/calendar/CalendarToolbar";
-import CalendarSidebar from "../components/calendar/CalendarSidebar";
-import CalendarMonth from "../components/calendar/CalendarMonth";
-import DayEventsPopover from "../components/calendar/DayEventsPopover";
-import EventList from "../components/calendar/EventList";
+
+import HeaderBar from "../components/calendar/HeaderBar";
+import Sidebar from "../components/calendar/Sidebar";
+import CalendarGrid from "../components/calendar/CalendarGrid";
+
 import {
     loadCalendars,
     toggleCalendar,
 } from "../features/calendars/calendarsSlice";
 import { loadEventsForRange } from "../features/events/eventsSlice";
+import "../styles/calendar.css";
 
 export default function CalendarPage() {
     const dispatch = useDispatch();
 
-    // глобальний стан
     const { items: calendars, selectedIds } = useSelector((s) => s.calendars);
     const eventsByDate = useSelector((s) => s.events.byDate);
     const filters = useSelector((s) => s.events.filters);
 
-    // локальний UI-стан
     const [activeDate, setActiveDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(null);
     const [visibleRange, setVisibleRange] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null);
 
-    // 1) підвантажуємо календарі
     useEffect(() => {
         dispatch(loadCalendars());
     }, [dispatch]);
 
-    // 2) коли відомий діапазон і є вибрані календарі — тягнемо події
     useEffect(() => {
         if (!visibleRange || !selectedIds.length) return;
         const [from, to] = visibleRange;
@@ -43,7 +40,6 @@ export default function CalendarPage() {
         );
     }, [dispatch, visibleRange, selectedIds, filters.types]);
 
-    // для сайдбара позначимо who isVisible
     const uiCalendars = useMemo(
         () =>
             calendars.map((c) => ({
@@ -53,70 +49,30 @@ export default function CalendarPage() {
         [calendars, selectedIds]
     );
 
-    // для правої колонки подій по вибраному дню
-    const selectedKey = selectedDate
-        ? new Date(
-              selectedDate.getFullYear(),
-              selectedDate.getMonth(),
-              selectedDate.getDate()
-          )
-        : null;
-
-    const selectedKeyStr = selectedKey
-        ? selectedKey.toISOString().slice(0, 10) // yyyy-MM-dd
-        : null;
-
-    const dayEvents = selectedKeyStr ? eventsByDate[selectedKeyStr] ?? [] : [];
+    const myCalendars = uiCalendars.filter((c) => c.type !== "shared");
+    const sharedCalendars = uiCalendars.filter((c) => c.type === "shared");
 
     return (
-        <div className="cal-layout">
-            <CalendarToolbar
-                activeDate={activeDate}
-                onPrev={() =>
-                    setActiveDate(
-                        new Date(
-                            activeDate.getFullYear(),
-                            activeDate.getMonth() - 1,
-                            1
-                        )
-                    )
-                }
-                onNext={() =>
-                    setActiveDate(
-                        new Date(
-                            activeDate.getFullYear(),
-                            activeDate.getMonth() + 1,
-                            1
-                        )
-                    )
-                }
-                onToday={() => setActiveDate(new Date())}
+        <div className="calendar-page">
+            <Sidebar
+                serviceName="Houdini"
+                myCalendars={myCalendars}
+                sharedCalendars={sharedCalendars}
+                onToggleCalendar={(id) => dispatch(toggleCalendar(id))}
+                onAddEvent={() => {}}
+                onAddCalendar={() => {}}
             />
 
-            <section className="cal-content">
-                <CalendarSidebar
-                    calendars={uiCalendars}
-                    onToggle={(id) => dispatch(toggleCalendar(id))}
-                />
-
-                <CalendarMonth
+            <div className="calendar-main">
+                <HeaderBar activeDate={activeDate} />
+                <CalendarGrid
                     activeDate={activeDate}
-                    onActiveRangeChange={setVisibleRange}
-                    eventsByDay={eventsByDate}
-                    onSelectDate={(d) => setSelectedDate(d)}
+                    eventsByDate={eventsByDate}
+                    selectedDate={selectedDate}
+                    onSelectDate={setSelectedDate}
+                    onRangeChange={setVisibleRange}
                 />
-
-                <EventList
-                    date={selectedDate || activeDate}
-                    events={dayEvents}
-                />
-            </section>
-
-            <DayEventsPopover
-                date={selectedDate}
-                events={dayEvents}
-                onClose={() => setSelectedDate(null)}
-            />
+            </div>
         </div>
     );
 }
