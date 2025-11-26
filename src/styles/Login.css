@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--main-color);
-    /* background-color: var(--second-color); */
+    /* background-color: var(--second-color)zvzv; */
     color: var(--main-text-color);
     
 }
@@ -43,7 +43,7 @@ a{
     background-image:
      linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.5) 0%,    /* тёмно сверху */
+      rgba(0, 0, 0, 0.5) 0%,    /*zz тёмно сверху */
       rgba(0, 0, 0, 0.0) 25%    /* исчезает вниз */
     ),
     linear-gradient(
@@ -61,7 +61,7 @@ a{
 }
 .container-login {
     background-color: var(--main-color);
-    /* background-color: var(--alt-main-color); */
+    /* background-color: var(--alt-main-color); zvzv*/
     height: 100%;
     display: flex;
     flex-direction: column;

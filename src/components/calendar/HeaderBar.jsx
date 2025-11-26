@@ -1,8 +1,21 @@
 /**
- * Поки просто контейнер під майбутній вміст.
- * @param {{ activeDate: Date }} props
+ * @param {{
+ *   activeDate: Date,
+ *   onPrevMonth: () => void,
+ *   onNextMonth: () => void,
+ *   onToday: () => void,
+ *   onLogout?: () => void,
+ *   isLoading?: boolean
+ * }} props
  */
-export default function HeaderBar({ activeDate }) {
+export default function HeaderBar({ 
+    activeDate, 
+    onPrevMonth,
+    onNextMonth,
+    onToday,
+    onLogout, 
+    isLoading 
+}) {
     const monthLabel = activeDate.toLocaleString("en-US", {
         month: "long",
         year: "numeric",
@@ -10,9 +23,32 @@ export default function HeaderBar({ activeDate }) {
 
     return (
         <header className="headerbar">
-            {/* Ліво: назва місяця */}
+            {/* Ліво: навігація по місяцях */}
             <div className="headerbar__left">
+                <div className="headerbar__nav">
+                    <button 
+                        className="headerbar__nav-btn" 
+                        onClick={onPrevMonth}
+                        title="Previous month"
+                    >
+                        ◀
+                    </button>
+                    <button 
+                        className="headerbar__today-btn" 
+                        onClick={onToday}
+                    >
+                        Today
+                    </button>
+                    <button 
+                        className="headerbar__nav-btn" 
+                        onClick={onNextMonth}
+                        title="Next month"
+                    >
+                        ▶
+                    </button>
+                </div>
                 <span className="headerbar__month">{monthLabel}</span>
+                {isLoading && <span className="headerbar__loading">Loading...</span>}
             </div>
 
             {/* Центр: пошук, тип івенту — TODO */}
@@ -20,9 +56,13 @@ export default function HeaderBar({ activeDate }) {
                 {/* TODO: search bar, select "event type" */}
             </div>
 
-            {/* Право: нікнейм + аватар — TODO */}
+            {/* Право: logout */}
             <div className="headerbar__right">
-                {/* TODO: nickname, avatar */}
+                {onLogout && (
+                    <button className="headerbar__logout" onClick={onLogout}>
+                        Logout
+                    </button>
+                )}
             </div>
         </header>
     );

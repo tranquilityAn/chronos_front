@@ -50,17 +50,71 @@ const slice = createSlice({
 export const { setTypesFilter } = slice.actions;
 export default slice.reducer;
 
-import { format, eachDayOfInterval } from "date-fns";
+import { eachDayOfInterval } from "date-fns";
+
+/**
+ * Форматирует дату в локальном часовом поясе как YYYY-MM-DD
+ * Используем локальное время, потому что пользователь создаёт события в своём часовом поясе
+ */
+function formatLocalDate(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Получает даты на которых должно отображаться событие
+ * Типы событий от бэкенда: "arrangement" (meeting), "reminder", "task"
+ */
 function materializeEventDates(ev) {
+    // Reminder — отображаем в день напоминания
     if (ev.type === "reminder") {
-        return [format(new Date(ev.remindAt), "yyyy-MM-dd")];
+        if (!ev.remindAt) return [];
+        return [formatLocalDate(ev.remindAt)];
     }
+    
+    // Task — отображаем в день дедлайна
     if (ev.type === "task") {
-        return [format(new Date(ev.dueAt), "yyyy-MM-dd")];
+        if (!ev.dueAt) return [];
+        return [formatLocalDate(ev.dueAt)];
     }
-    const start = new Date(ev.startAt);
-    const end = new Date(ev.endAt ?? ev.startAt);
-    return eachDayOfInterval({ start, end }).map((d) =>
-        format(d, "yyyy-MM-dd")
-    );
+    
+    // Meeting/Arrangement — отображаем в диапазоне дат
+    // type может быть "arrangement" (от MongoDB discriminator) или "meeting"
+    if (ev.type === "arrangement" || ev.type === "meeting") {
+        // Если allDay событие без startAt/endAt — используем createdAt
+        if (ev.allDay && !ev.startAt) {
+            const date = ev.createdAt ? new Date(ev.createdAt) : new Date();
+            return [formatLocalDate(date)];
+        }
+        
+        if (!ev.startAt) return [];
+        
+        const start = new Date(ev.startAt);
+        const end = new Date(ev.endAt ?? ev.startAt);
+        
+        // Защита от невалидных дат
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+        if (start > end) return [formatLocalDate(start)];
+        
+        // Для многодневных событий генерируем все даты в диапазоне
+        return eachDayOfInterval({ start, end }).map((d) => formatLocalDate(d));
+    }
+    
+    // Fallback для неизвестных типов — пробуем startAt или createdAt
+    if (ev.startAt) {
+        const start = new Date(ev.startAt);
+        const end = new Date(ev.endAt ?? ev.startAt);
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+            return eachDayOfInterval({ start, end }).map((d) => formatLocalDate(d));
+        }
+    }
+    
+    if (ev.createdAt) {
+        return [formatLocalDate(ev.createdAt)];
+    }
+    
+    return [];
 }

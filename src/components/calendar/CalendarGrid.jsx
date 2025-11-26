@@ -3,8 +3,71 @@ import ColorDot from "./ColorDot";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+/**
+ * Форматирует дату в локальном часовом поясе как YYYY-MM-DD
+ * Важно использовать локальное время для соответствия с eventsByDate
+ */
 function getKey(date) {
-    return date.toISOString().slice(0, 10);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Нормализует тип события для отображения
+ * Бэкенд возвращает "arrangement" вместо "meeting"
+ */
+function normalizeEventType(type) {
+    if (type === "arrangement") return "meeting";
+    return type;
+}
+
+function formatEventTime(event) {
+    const type = normalizeEventType(event.type);
+    
+    // Meeting/Arrangement
+    if (type === "meeting") {
+        if (event.allDay) return "All day";
+        if (event.startAt) {
+            const d = new Date(event.startAt);
+            return d.toLocaleTimeString("en-US", { 
+                hour: "2-digit", 
+                minute: "2-digit",
+                hour12: false 
+            });
+        }
+    }
+    
+    // Reminder
+    if (type === "reminder" && event.remindAt) {
+        const d = new Date(event.remindAt);
+        return d.toLocaleTimeString("en-US", { 
+            hour: "2-digit", 
+            minute: "2-digit",
+            hour12: false 
+        });
+    }
+    
+    // Task
+    if (type === "task" && event.dueAt) {
+        const d = new Date(event.dueAt);
+        return d.toLocaleTimeString("en-US", { 
+            hour: "2-digit", 
+            minute: "2-digit",
+            hour12: false 
+        });
+    }
+    
+    return null;
+}
+
+/**
+ * Возвращает CSS класс для типа события
+ */
+function getEventTypeClass(type) {
+    const normalized = normalizeEventType(type);
+    return normalized || "default";
 }
 
 /**
@@ -23,6 +86,8 @@ export default function CalendarGrid({
     onSelectDate,
     onRangeChange,
 }) {
+    const today = useMemo(() => getKey(new Date()), []);
+    
     const { days, from, to } = useMemo(() => {
         const year = activeDate.getFullYear();
         const month = activeDate.getMonth();
@@ -48,10 +113,13 @@ export default function CalendarGrid({
         return { days: arr, from: fromDate, to: toDate };
     }, [activeDate]);
 
-    // повідомляємо сторінці видимий діапазон
+    // повідомляємо сторінці видимий діапазон (використовуємо ISO строки для стабільного порівняння)
+    const fromISO = from.toISOString();
+    const toISO = to.toISOString();
+    
     useEffect(() => {
-        onRangeChange?.([from, to]);
-    }, [from, to, onRangeChange]);
+        onRangeChange?.({ from: fromISO, to: toISO });
+    }, [fromISO, toISO, onRangeChange]);
 
     const month = activeDate.getMonth();
 
@@ -72,8 +140,9 @@ export default function CalendarGrid({
                     const key = getKey(date);
                     const items = eventsByDate[key] || [];
                     const isCurrentMonth = date.getMonth() === month;
+                    const isToday = key === today;
                     const isSelected =
-                        selectedDate && getKey(selectedDate) === getKey(date);
+                        selectedDate && getKey(selectedDate) === key;
 
                     return (
                         <button
@@ -81,34 +150,45 @@ export default function CalendarGrid({
                             className={[
                                 "cal-grid__cell",
                                 !isCurrentMonth && "cal-grid__cell--outside",
+                                isToday && "cal-grid__cell--today",
                                 isSelected && "cal-grid__cell--selected",
                             ]
                                 .filter(Boolean)
                                 .join(" ")}
                             onClick={() => onSelectDate?.(date)}
                         >
-                            <div className="cal-grid__cell-date">
+                            <div className={`cal-grid__cell-date ${isToday ? "cal-grid__cell-date--today" : ""}`}>
                                 {date.getDate()}
                             </div>
 
                             <div className="cal-grid__cell-events">
-                                {items.slice(0, 3).map((ev) => (
-                                    <div
-                                        key={ev.id}
-                                        className="cal-grid__event-row"
-                                    >
-                                        <ColorDot
-                                            color={
-                                                ev.color ||
-                                                ev.calendar?.color ||
-                                                "#000"
-                                            }
-                                        />
-                                        <span className="cal-grid__event-title">
-                                            {ev.title}
-                                        </span>
-                                    </div>
-                                ))}
+                                {items.slice(0, 3).map((ev) => {
+                                    const time = formatEventTime(ev);
+                                    const typeClass = getEventTypeClass(ev.type);
+                                    return (
+                                        <div
+                                            key={ev.id}
+                                            className={`cal-grid__event-row cal-grid__event-row--${typeClass}`}
+                                            title={`${ev.title}${time ? ` at ${time}` : ""}`}
+                                        >
+                                            <ColorDot
+                                                color={
+                                                    ev.color ||
+                                                    ev.calendar?.color ||
+                                                    "#EDE986"
+                                                }
+                                            />
+                                            {time && (
+                                                <span className="cal-grid__event-time">
+                                                    {time}
+                                                </span>
+                                            )}
+                                            <span className="cal-grid__event-title">
+                                                {ev.title}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                                 {items.length > 3 && (
                                     <div className="cal-grid__event-more">
                                         +{items.length - 3} more
