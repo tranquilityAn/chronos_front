@@ -92,6 +92,7 @@
 
 .headerbar__today-btn {
     padding: 6px 14px;
+    height: 32px;
     background: transparent;
     border: 1px solid rgba(237, 233, 134, 0.3);
     color: var(--second-color);
@@ -142,7 +143,7 @@
     flex: 1;
 }
 .sidebar__brand{
-margin-bottom: 3%;
+    margin-bottom: 3%;
 }
 .sidebar__section-header {
     background: none;
@@ -202,7 +203,43 @@ margin-bottom: 3%;
 }
 
 .sidebar__item {
-    padding: 6px 0;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar__item:hover {
+    background: rgba(237, 233, 134, 0.1);
+}
+
+.sidebar__item:hover .sidebar__item-menu {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar__item-menu {
+    opacity: 0;
+    visibility: hidden;
+    background: none;
+    border: none;
+    color: var(--second-text-color);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-left: 8px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.sidebar__item-menu:hover {
+    color: var(--second-color);
+    transform: scale(1.2);
 }
 
 .sidebar__checkbox-row {
@@ -213,6 +250,8 @@ margin-bottom: 3%;
     color: var(--main-text-color);
     font-size: 14px;
     font-weight: 500;
+    flex: 1;
+    min-width: 0;
 }
 
 .sidebar__checkbox-row:hover {
@@ -220,9 +259,39 @@ margin-bottom: 3%;
 }
 
 .sidebar__checkbox-row input[type="checkbox"] {
-    accent-color: var(--second-color);
-    width: 16px;
-    height: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 2px solid var(--calendar-color, var(--second-color));
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.sidebar__checkbox-row input[type="checkbox"]:checked {
+    background: var(--calendar-color, var(--second-color));
+    border-color: var(--calendar-color, var(--second-color));
+}
+
+.sidebar__checkbox-row input[type="checkbox"]:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--main-color);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.sidebar__checkbox-row input[type="checkbox"]:hover {
+    border-color: var(--calendar-color, var(--second-color));
+    filter: brightness(1.1);
 }
 
 .sidebar__checkbox-row span {
@@ -232,8 +301,8 @@ margin-bottom: 3%;
 /* кнопки внизу */
 .sidebar__footer {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 0;
     margin-top: auto;
     padding-top: 20px;
 }
@@ -246,13 +315,33 @@ margin-bottom: 3%;
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 0;
     transition: all 0.2s ease;
+    flex: 1;
+    position: relative;
+}
+
+.sidebar__btn:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-right: none;
+}
+
+.sidebar__btn:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.sidebar__btn:not(:first-child):not(:last-child) {
+    border-left: none;
+    border-right: none;
 }
 
 .sidebar__btn:hover {
     background: var(--second-color);
     color: var(--main-color);
+    transform: scale(1.05);
+    z-index: 1;
 }
 
 /* ===== CALENDAR GRID ===== */
@@ -308,12 +397,15 @@ margin-bottom: 3%;
     flex-direction: column;
     align-items: flex-start;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.3s ease;
 }
 
 .cal-grid__cell:hover {
-    background: rgba(237, 233, 134, 0.08);
-    border-color: rgba(237, 233, 134, 0.25);
+    background: rgba(237, 233, 134, 0.15);
+    border-color: rgba(237, 233, 134, 0.4);
+    /* border-width: 2px; */
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(237, 233, 134, 0.2);
 }
 
 .cal-grid__cell--outside {
@@ -322,7 +414,11 @@ margin-bottom: 3%;
 }
 
 .cal-grid__cell--outside:hover {
-    opacity: 0.7;
+    opacity: 0.8;
+    background: rgba(237, 233, 134, 0.1);
+    border-color: rgba(237, 233, 134, 0.3);
+    border-width: 2px;
+    transform: scale(1.02);
 }
 
 .cal-grid__cell--selected {
@@ -336,7 +432,11 @@ margin-bottom: 3%;
 }
 
 .cal-grid__cell--today:hover {
-    background: rgba(237, 233, 134, 0.18);
+    background: rgba(237, 233, 134, 0.25);
+    border-color: rgba(237, 233, 134, 0.5);
+    border-width: 2px;
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(237, 233, 134, 0.3);
 }
 
 /* Цифра дня */
@@ -381,32 +481,54 @@ margin-bottom: 3%;
     gap: 4px;
     align-items: center;
     font-size: 11px;
-    padding: 2px 4px;
+    padding: 2px 4px 2px 0;
     background: rgba(237, 233, 134, 0.1);
     border-radius: 3px;
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
+    cursor: pointer;
 }
 
 .cal-grid__event-row:hover {
-    background: rgba(237, 233, 134, 0.2);
+    background: rgba(237, 233, 134, 0.25);
+    transform: translateX(2px);
+}
+
+.cal-grid__event-row:focus {
+    outline: 1px solid var(--second-color);
+    outline-offset: 1px;
 }
 
 /* Типы событий */
-.cal-grid__event-row--meeting,
-.cal-grid__event-row--arrangement {
-    border-left: 2px solid var(--second-color);
+.cal-grid__event-type {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 3px 0 0 3px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
-.cal-grid__event-row--reminder {
-    border-left: 2px solid #5DADE2;
+.cal-grid__event-row--meeting .cal-grid__event-type,
+.cal-grid__event-row--arrangement .cal-grid__event-type {
+    background: rgba(237, 233, 134, 0.25);
+    color: var(--second-color);
 }
 
-.cal-grid__event-row--task {
-    border-left: 2px solid #7AC74F;
+.cal-grid__event-row--reminder .cal-grid__event-type {
+    background: rgba(93, 173, 226, 0.25);
+    color: #5DADE2;
 }
 
-.cal-grid__event-row--default {
-    border-left: 2px solid var(--second-text-color);
+.cal-grid__event-row--task .cal-grid__event-type {
+    background: rgba(122, 199, 79, 0.25);
+    color: #7AC74F;
+}
+
+.cal-grid__event-row--default .cal-grid__event-type {
+    background: rgba(237, 233, 134, 0.15);
+    color: var(--second-text-color);
 }
 
 .cal-grid__event-time {

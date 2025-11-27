@@ -7,10 +7,11 @@ import "../../styles/modal.css";
  *   isOpen: boolean,
  *   onClose: () => void,
  *   title?: string,
- *   children: React.ReactNode
+ *   children: React.ReactNode,
+ *   closePosition?: "left" | "right"
  * }} props
  */
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({ isOpen, onClose, title, children, closePosition = "right" }) {
     // Закрытие по Escape
     useEffect(() => {
         const handleEsc = (e) => {
@@ -31,15 +32,22 @@ export default function Modal({ isOpen, onClose, title, children }) {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+                <div className={`modal-header modal-header--close-${closePosition}`}>
+                    {closePosition === "left" && (
+                        <button className="modal-close" onClick={onClose}>
+                            ✕
+                        </button>
+                    )}
                     {title && <h2 className="modal-title">{title}</h2>}
-                    <button className="modal-close" onClick={onClose}>
-                        ✕
-                    </button>
+                    {!title && <div className="modal-header__spacer" />}
+                    {closePosition === "right" && (
+                        <button className="modal-close" onClick={onClose}>
+                            ✕
+                        </button>
+                    )}
                 </div>
                 <div className="modal-body">{children}</div>
             </div>
         </div>
     );
 }
-

@@ -17,9 +17,23 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      return await registerRequest({ email, password });
+      // Валидация и нормализация email перед вызовом API
+      const trimmedEmail = email?.trim() || '';
+      if (!trimmedEmail) {
+        return rejectWithValue('Email is required');
+      }
+      if (!password || !password.trim()) {
+        return rejectWithValue('Password is required');
+      }
+      
+      // Передаем нормализованный email
+      return await registerRequest({ email: trimmedEmail, password });
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.message || err.message || 'Register failed');
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          err?.message || 
+                          'Register failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );

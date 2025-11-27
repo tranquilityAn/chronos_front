@@ -18,12 +18,25 @@ export default function Toast({
     onClose, 
     duration = 3000 
 }) {
+    const [isClosing, setIsClosing] = useState(false);
+
     useEffect(() => {
         if (isVisible && duration > 0) {
-            const timer = setTimeout(onClose, duration);
+            const timer = setTimeout(() => {
+                setIsClosing(true);
+                // Ждем завершения анимации перед вызовом onClose
+                setTimeout(onClose, 300);
+            }, duration);
             return () => clearTimeout(timer);
         }
     }, [isVisible, duration, onClose]);
+
+    // Сброс состояния закрытия при новом показе
+    useEffect(() => {
+        if (isVisible) {
+            setIsClosing(false);
+        }
+    }, [isVisible]);
 
     if (!isVisible) return null;
 
@@ -34,10 +47,13 @@ export default function Toast({
     };
 
     return (
-        <div className={`toast toast--${type}`}>
+        <div className={`toast toast--${type} ${isClosing ? "toast--closing" : ""}`}>
             <span className="toast__icon">{icons[type]}</span>
             <span className="toast__message">{message}</span>
-            <button className="toast__close" onClick={onClose}>
+            <button className="toast__close" onClick={() => {
+                setIsClosing(true);
+                setTimeout(onClose, 300);
+            }}>
                 ✕
             </button>
         </div>

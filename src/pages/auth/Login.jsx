@@ -19,7 +19,7 @@ export default function Login() {
       await dispatch(login({ email, password })).unwrap();
       navigate("/");
     } catch (err) {
-      console.error(err);
+      // Ошибка обрабатывается через Redux state
     }
   };
 

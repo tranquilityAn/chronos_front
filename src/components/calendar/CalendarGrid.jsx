@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import ColorDot from "./ColorDot";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -71,12 +70,31 @@ function getEventTypeClass(type) {
 }
 
 /**
+ * Возвращает текст типа события для отображения
+ */
+function getEventTypeLabel(type) {
+    const normalized = normalizeEventType(type);
+    switch (normalized) {
+        case "meeting":
+            return "Meeting";
+        case "reminder":
+            return "Reminder";
+        case "task":
+            return "Task";
+        default:
+            return "Event";
+    }
+}
+
+/**
  * @param {{
  *   activeDate: Date,
  *   eventsByDate: Record<string, Array>,
  *   selectedDate: Date | null,
  *   onSelectDate: (d: Date) => void,
- *   onRangeChange: ([Date, Date]) => void,
+ *   onRangeChange: ({ from: string, to: string }) => void,
+ *   onEventClick: (event: object) => void,
+ *   onShowAllEvents: (date: Date, events: Array) => void,
  * }} props
  */
 export default function CalendarGrid({
@@ -85,6 +103,8 @@ export default function CalendarGrid({
     selectedDate,
     onSelectDate,
     onRangeChange,
+    onEventClick,
+    onShowAllEvents,
 }) {
     const today = useMemo(() => getKey(new Date()), []);
     
@@ -122,6 +142,11 @@ export default function CalendarGrid({
     }, [fromISO, toISO, onRangeChange]);
 
     const month = activeDate.getMonth();
+
+    const handleShowAllEvents = (date, events, e) => {
+        e.stopPropagation();
+        onShowAllEvents?.(date, events);
+    };
 
     return (
         <div className="cal-grid">
@@ -165,19 +190,28 @@ export default function CalendarGrid({
                                 {items.slice(0, 3).map((ev) => {
                                     const time = formatEventTime(ev);
                                     const typeClass = getEventTypeClass(ev.type);
+                                    const typeLabel = getEventTypeLabel(ev.type);
                                     return (
                                         <div
                                             key={ev.id}
                                             className={`cal-grid__event-row cal-grid__event-row--${typeClass}`}
                                             title={`${ev.title}${time ? ` at ${time}` : ""}`}
-                                        >
-                                            <ColorDot
-                                                color={
-                                                    ev.color ||
-                                                    ev.calendar?.color ||
-                                                    "#EDE986"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEventClick?.(ev);
+                                            }}
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter" || e.key === " ") {
+                                                    e.stopPropagation();
+                                                    onEventClick?.(ev);
                                                 }
-                                            />
+                                            }}
+                                        >
+                                            <span className="cal-grid__event-type">
+                                                {typeLabel}
+                                            </span>
                                             {time && (
                                                 <span className="cal-grid__event-time">
                                                     {time}
@@ -190,7 +224,17 @@ export default function CalendarGrid({
                                     );
                                 })}
                                 {items.length > 3 && (
-                                    <div className="cal-grid__event-more">
+                                    <div 
+                                        className="cal-grid__event-more"
+                                        onClick={(e) => handleShowAllEvents(date, items, e)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                handleShowAllEvents(date, items, e);
+                                            }
+                                        }}
+                                    >
                                         +{items.length - 3} more
                                     </div>
                                 )}

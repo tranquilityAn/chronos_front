@@ -109,7 +109,23 @@ export default function CreateEventModal({
 
         if (formData.type === "arrangement") {
             payload.allDay = formData.allDay;
-            if (!formData.allDay) {
+            if (formData.allDay) {
+                // Для allDay событий сервер удаляет startAt/endAt (pre-save hook)
+                // Но валидация на сервере может требовать startAt для определения даты
+                // Отправляем startAt для валидации, но понимаем, что он не сохранится
+                if (!formData.startAt) {
+                    setError("Start date is required");
+                    return;
+                }
+                const startDate = new Date(formData.startAt);
+                startDate.setHours(0, 0, 0, 0);
+                // Отправляем startAt для валидации, но сервер его удалит для allDay
+                payload.startAt = startDate.toISOString();
+                // endAt не обязателен для allDay, но можно отправить для валидации
+                const endDate = new Date(startDate);
+                endDate.setHours(23, 59, 59, 999);
+                payload.endAt = endDate.toISOString();
+            } else {
                 if (!formData.startAt) {
                     setError("Start date/time is required");
                     return;

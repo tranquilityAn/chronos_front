@@ -7,16 +7,24 @@ import api from "../../app/api";
  * @param {string} from - ISO date string
  * @param {string} to - ISO date string
  * @param {string[]} types - массив типов событий
+ * 
+ * Примечание: бэкенд использует "arrangement" для встреч, а не "meeting"
+ * Поэтому нужно преобразовать "meeting" -> "arrangement" перед отправкой запроса
  */
 export const fetchEvents = async ({ calendarId, from, to, types }) => {
     const params = {};
     if (from) params.from = from;
     if (to) params.to = to;
-    if (types?.length) params.types = types.join(",");
+    if (types?.length) {
+        // Преобразуем "meeting" в "arrangement" для соответствия бэкенду
+        const normalizedTypes = types.map(t => t === "meeting" ? "arrangement" : t);
+        params.types = normalizedTypes.join(",");
+    }
     
     const { data } = await api.get(`api/calendars/${calendarId}/events`, {
         params,
     });
+    
     return data; // { items, page, limit, total }
 };
 

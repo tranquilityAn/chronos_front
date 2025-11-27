@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ColorDot from "./ColorDot";
 
 /**
  * @param {{
@@ -9,6 +8,7 @@ import ColorDot from "./ColorDot";
  *   onToggleCalendar: (id: string) => void,
  *   onAddEvent: () => void,
  *   onAddCalendar: () => void,
+ *   onEditCalendar: (calendar: object) => void,
  * }} props
  */
 export default function Sidebar({
@@ -18,6 +18,7 @@ export default function Sidebar({
     onToggleCalendar,
     onAddEvent,
     onAddCalendar,
+    onEditCalendar,
 }) {
     const [isMyOpen, setIsMyOpen] = useState(true);
     const [isSharedOpen, setIsSharedOpen] = useState(true);
@@ -55,7 +56,10 @@ export default function Sidebar({
                         <ul className="sidebar__list">
                             {myCalendars.map((c) => (
                                 <li key={c.id} className="sidebar__item">
-                                    <label className="sidebar__checkbox-row">
+                                    <label 
+                                        className="sidebar__checkbox-row"
+                                        style={{ "--calendar-color": c.color || "#EDE986" }}
+                                    >
                                         <input
                                             type="checkbox"
                                             checked={c.isVisible}
@@ -63,9 +67,18 @@ export default function Sidebar({
                                                 onToggleCalendar(c.id)
                                             }
                                         />
-                                        <ColorDot color={c.color} />
                                         <span>{c.name}</span>
                                     </label>
+                                    <button
+                                        className="sidebar__item-menu"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEditCalendar?.(c);
+                                        }}
+                                        title="Edit calendar"
+                                    >
+                                        ⋯
+                                    </button>
                                 </li>
                             ))}
                         </ul>
@@ -90,7 +103,10 @@ export default function Sidebar({
                         <ul className="sidebar__list">
                             {sharedCalendars.map((c) => (
                                 <li key={c.id} className="sidebar__item">
-                                    <label className="sidebar__checkbox-row">
+                                    <label 
+                                        className="sidebar__checkbox-row"
+                                        style={{ "--calendar-color": c.color || "#EDE986" }}
+                                    >
                                         <input
                                             type="checkbox"
                                             checked={c.isVisible}
@@ -98,9 +114,18 @@ export default function Sidebar({
                                                 onToggleCalendar(c.id)
                                             }
                                         />
-                                        <ColorDot color={c.color} />
                                         <span>{c.name}</span>
                                     </label>
+                                    <button
+                                        className="sidebar__item-menu"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEditCalendar?.(c);
+                                        }}
+                                        title="Edit calendar"
+                                    >
+                                        ⋯
+                                    </button>
                                 </li>
                             ))}
                         </ul>

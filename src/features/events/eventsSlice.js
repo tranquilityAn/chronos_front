@@ -34,10 +34,40 @@ const slice = createSlice({
         b.addCase(loadEventsForRange.fulfilled, (s, a) => {
             s.status = "succeeded";
             s.byDate = {};
+            
             for (const ev of a.payload) {
-                const dates = materializeEventDates(ev);
+                // Явно обрабатываем тип "arrangement" - это основной тип для встреч
+                // Бэкенд возвращает __t: "arrangement" для встреч (MongoDB discriminator)
+                let eventType = ev.type || ev.__t;
+                
+                // Если тип не определён, но есть поля характерные для arrangement, считаем его arrangement
+                if (!eventType) {
+                    // Если есть startAt/endAt или allDay, это скорее всего arrangement
+                    if (ev.startAt || ev.endAt || ev.allDay !== undefined) {
+                        eventType = "arrangement";
+                    } else {
+                        eventType = "unknown";
+                    }
+                }
+                
+                // Нормализуем "meeting" -> "arrangement" для внутренней обработки
+                if (eventType === "meeting") {
+                    eventType = "arrangement";
+                }
+                
+                const normalizedEv = {
+                    ...ev,
+                    type: eventType,
+                };
+                
+                const dates = materializeEventDates(normalizedEv);
+                
+                if (dates.length === 0) {
+                    continue;
+                }
+                
                 dates.forEach((d) => {
-                    (s.byDate[d] ||= []).push(ev);
+                    (s.byDate[d] ||= []).push(normalizedEv);
                 });
             }
         });
@@ -72,48 +102,109 @@ function materializeEventDates(ev) {
     // Reminder — отображаем в день напоминания
     if (ev.type === "reminder") {
         if (!ev.remindAt) return [];
-        return [formatLocalDate(ev.remindAt)];
+        try {
+            return [formatLocalDate(ev.remindAt)];
+        } catch (e) {
+            return [];
+        }
     }
     
     // Task — отображаем в день дедлайна
     if (ev.type === "task") {
         if (!ev.dueAt) return [];
-        return [formatLocalDate(ev.dueAt)];
+        try {
+            return [formatLocalDate(ev.dueAt)];
+        } catch (e) {
+            return [];
+        }
     }
     
-    // Meeting/Arrangement — отображаем в диапазоне дат
-    // type может быть "arrangement" (от MongoDB discriminator) или "meeting"
+    // Arrangement (Meeting) — отображаем в диапазоне дат
+    // Бэкенд использует тип "arrangement" для встреч
+    // Это основной тип для встреч, поэтому обрабатываем его явно
     if (ev.type === "arrangement" || ev.type === "meeting") {
-        // Если allDay событие без startAt/endAt — используем createdAt
-        if (ev.allDay && !ev.startAt) {
-            const date = ev.createdAt ? new Date(ev.createdAt) : new Date();
-            return [formatLocalDate(date)];
+        // Для allDay событий сервер удаляет startAt/endAt (pre-save hook)
+        // Используем createdAt для определения даты (это единственный способ, так как бэкенд удаляет startAt)
+        if (ev.allDay === true) {
+            if (ev.createdAt) {
+                try {
+                    return [formatLocalDate(ev.createdAt)];
+                } catch (e) {
+                    return [];
+                }
+            }
+            return [];
         }
         
-        if (!ev.startAt) return [];
+        // Для не-allDay событий используем startAt/endAt
+        if (!ev.startAt) {
+            // Fallback на createdAt если startAt отсутствует (может быть для старых событий)
+            if (ev.createdAt) {
+                try {
+                    return [formatLocalDate(ev.createdAt)];
+                } catch (e) {
+                    return [];
+                }
+            }
+            return [];
+        }
         
-        const start = new Date(ev.startAt);
-        const end = new Date(ev.endAt ?? ev.startAt);
-        
-        // Защита от невалидных дат
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
-        if (start > end) return [formatLocalDate(start)];
-        
-        // Для многодневных событий генерируем все даты в диапазоне
-        return eachDayOfInterval({ start, end }).map((d) => formatLocalDate(d));
+        try {
+            const start = new Date(ev.startAt);
+            const end = ev.endAt ? new Date(ev.endAt) : start;
+            
+            // Защита от невалидных дат
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                // Fallback на createdAt если даты невалидны
+                if (ev.createdAt) {
+                    try {
+                        return [formatLocalDate(ev.createdAt)];
+                    } catch (e) {
+                        return [];
+                    }
+                }
+                return [];
+            }
+            
+            if (start > end) {
+                return [formatLocalDate(start)];
+            }
+            
+            // Для многодневных событий генерируем все даты в диапазоне
+            const dates = eachDayOfInterval({ start, end });
+            return dates.map((d) => formatLocalDate(d));
+        } catch (e) {
+            // Fallback на createdAt
+            if (ev.createdAt) {
+                try {
+                    return [formatLocalDate(ev.createdAt)];
+                } catch (e2) {
+                    return [];
+                }
+            }
+            return [];
+        }
     }
     
     // Fallback для неизвестных типов — пробуем startAt или createdAt
     if (ev.startAt) {
-        const start = new Date(ev.startAt);
-        const end = new Date(ev.endAt ?? ev.startAt);
-        if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
-            return eachDayOfInterval({ start, end }).map((d) => formatLocalDate(d));
+        try {
+            const start = new Date(ev.startAt);
+            const end = ev.endAt ? new Date(ev.endAt) : start;
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+                return eachDayOfInterval({ start, end }).map((d) => formatLocalDate(d));
+            }
+        } catch (e) {
+            // Игнорируем ошибки
         }
     }
     
     if (ev.createdAt) {
-        return [formatLocalDate(ev.createdAt)];
+        try {
+            return [formatLocalDate(ev.createdAt)];
+        } catch (e) {
+            return [];
+        }
     }
     
     return [];

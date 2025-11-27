@@ -15,15 +15,31 @@ export default function Register() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    // Валидация и нормализация email
+    const trimmedEmail = (email || '').trim();
+    const trimmedPassword = (password || '').trim();
+    
+    if (!trimmedEmail) {
+      alert("Email не может быть пустым");
+      return;
+    }
+    
+    if (!trimmedPassword) {
+      alert("Пароль не может быть пустым");
+      return;
+    }
+    
     if (password !== password2) {
       alert("Пароли не совпадают");
       return;
     }
+    
     try {
-      await dispatch(registerAction({ email, password })).unwrap();
+      await dispatch(registerAction({ email: trimmedEmail, password })).unwrap();
       navigate("/");
     } catch (err) {
-      console.error(err);
+      alert(err?.message || err?.payload || "Ошибка регистрации");
     }
   };
 
