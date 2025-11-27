@@ -17,7 +17,8 @@ import {
     toggleCalendar,
 } from "../features/calendars/calendarsSlice";
 import { loadEventsForRange } from "../features/events/eventsSlice";
-import { logout } from "../features/auth/authSlice";
+import { logout, updateUser } from "../features/auth/authSlice";
+import { getCurrentUser } from "../features/user/userApi";
 import { createCalendar, updateCalendar, deleteCalendar } from "../features/calendars/calendarApi";
 import { createEvent, deleteEvent, updateEvent } from "../features/events/eventApi";
 import "../styles/calendar.css";
@@ -31,12 +32,34 @@ export default function CalendarPage() {
 
     // Проверяем токен — если нет, редирект на логин
     const token = useSelector((s) => s.auth.token);
+    const user = useSelector((s) => s.auth.user);
     
     useEffect(() => {
         if (!token) {
             navigate("/login", { replace: true });
         }
     }, [token, navigate]);
+
+    // Загрузка данных пользователя при инициализации (если есть токен, но нет данных пользователя)
+    useEffect(() => {
+        const loadUser = async () => {
+            if (token && !user) {
+                try {
+                    const userData = await getCurrentUser();
+                    dispatch(updateUser(userData));
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    // Если ошибка 401, токен невалидный - очищаем и редиректим на логин
+                    if (error?.response?.status === 401) {
+                        dispatch(logout());
+                        navigate("/login", { replace: true });
+                    }
+                }
+            }
+        };
+
+        loadUser();
+    }, [token, user, dispatch, navigate]);
 
     const { items: calendars, selectedIds, status: calStatus } = useSelector((s) => s.calendars);
     const { byDate: eventsByDate, status: evStatus } = useSelector((s) => s.events);

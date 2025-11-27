@@ -1,3 +1,7 @@
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import UserAvatar from '../ui/UserAvatar';
+
 /**
  * @param {{
  *   activeDate: Date,
@@ -16,10 +20,37 @@ export default function HeaderBar({
     onLogout, 
     isLoading 
 }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const user = useSelector((state) => state.auth.user);
+    const isProfilePage = location.pathname === '/profile';
+    
     const monthLabel = activeDate.toLocaleString("en-US", {
         month: "long",
         year: "numeric",
     });
+
+    const handleHomeClick = () => {
+        navigate('/');
+    };
+
+    // Если страница профиля - показываем только "Houdini" как ссылку
+    if (isProfilePage) {
+        return (
+            <header className="headerbar">
+                <div className="headerbar__left">
+                    <span 
+                        className="headerbar__brand"
+                        onClick={handleHomeClick}
+                        style={{ cursor: 'pointer' }}
+                        title="На главную"
+                    >
+                        Houdini
+                    </span>
+                </div>
+            </header>
+        );
+    }
 
     return (
         <header className="headerbar">
@@ -56,13 +87,12 @@ export default function HeaderBar({
                 {/* TODO: search bar, select "event type" */}
             </div>
 
-            {/* Право: logout */}
+            {/* Право: имя пользователя и навигация */}
             <div className="headerbar__right">
-                {onLogout && (
-                    <button className="headerbar__logout" onClick={onLogout}>
-                        Logout
-                    </button>
+                {user?.name && (
+                    <span className="headerbar__user-name">{user.name}</span>
                 )}
+                <UserAvatar onLogout={onLogout} />
             </div>
         </header>
     );

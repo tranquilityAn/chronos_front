@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * @param {{
@@ -20,14 +21,26 @@ export default function Sidebar({
     onAddCalendar,
     onEditCalendar,
 }) {
+    const navigate = useNavigate();
     const [isMyOpen, setIsMyOpen] = useState(true);
     const [isSharedOpen, setIsSharedOpen] = useState(true);
+
+    const handleBrandClick = () => {
+        navigate('/');
+    };
 
     return (
         <aside className="sidebar">
             {/* Назва сервісу зверху */}
             <div className="sidebar__brand">
-                <span className="sidebar__brand-title">{serviceName}</span>
+                <span 
+                    className="sidebar__brand-title"
+                    onClick={handleBrandClick}
+                    style={{ cursor: 'pointer' }}
+                    title="На главную"
+                >
+                    {serviceName}
+                </span>
             </div>
 
             {/* Блок "your calendars" */}
