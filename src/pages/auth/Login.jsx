@@ -1,13 +1,14 @@
 // src/pages/auth/Login.jsx
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../../styles/Auth.module.css";
 import { login } from "../../features/auth/authSlice";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { status, error, token } = useSelector((s) => s.auth);
 
   const [email, setEmail] = useState("");
@@ -17,7 +18,15 @@ export default function Login() {
     e.preventDefault();
     try {
       await dispatch(login({ email, password })).unwrap();
-      navigate("/");
+      
+      // Проверяем наличие redirect параметра
+      const redirectUrl = searchParams.get("redirect");
+      if (redirectUrl) {
+        // Декодируем и перенаправляем на сохраненный URL
+        navigate(decodeURIComponent(redirectUrl), { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       // Ошибка обрабатывается через Redux state
     }

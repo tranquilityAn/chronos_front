@@ -100,7 +100,7 @@ export default function CalendarPage() {
     // Модальные окна
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isEditCalendarModalOpen, setIsEditCalendarModalOpen] = useState(false);
-    const [selectedCalendar, setSelectedCalendar] = useState(null);
+    const [selectedCalendarId, setSelectedCalendarId] = useState(null);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeletingCalendar, setIsDeletingCalendar] = useState(false);
@@ -149,8 +149,8 @@ export default function CalendarPage() {
         [calendars, selectedIds]
     );
 
-    const myCalendars = uiCalendars.filter((c) => c.type !== "shared");
-    const sharedCalendars = uiCalendars.filter((c) => c.type === "shared");
+    const myCalendars = uiCalendars.filter((c) => c.role === "owner");
+    const sharedCalendars = uiCalendars.filter((c) => c.role !== "owner");
 
     // Handlers
     const handleLogout = () => {
@@ -177,7 +177,7 @@ export default function CalendarPage() {
 
     // Редактирование календаря
     const handleEditCalendar = useCallback((calendar) => {
-        setSelectedCalendar(calendar);
+        setSelectedCalendarId(calendar?.id || null);
         setIsEditCalendarModalOpen(true);
     }, []);
 
@@ -187,7 +187,7 @@ export default function CalendarPage() {
         try {
             await updateCalendar(calendarId, data);
             setIsEditCalendarModalOpen(false);
-            setSelectedCalendar(null);
+            setSelectedCalendarId(null);
             showToast("Calendar updated successfully!", "success");
             // Перезагружаем список календарей
             dispatch(loadCalendars());
@@ -205,7 +205,7 @@ export default function CalendarPage() {
         try {
             await deleteCalendar(calendarId);
             setIsEditCalendarModalOpen(false);
-            setSelectedCalendar(null);
+            setSelectedCalendarId(null);
             showToast("Calendar deleted successfully!", "success");
             // Перезагружаем список календарей
             dispatch(loadCalendars());
@@ -386,11 +386,11 @@ export default function CalendarPage() {
                 isOpen={isEditCalendarModalOpen}
                 onClose={() => {
                     setIsEditCalendarModalOpen(false);
-                    setSelectedCalendar(null);
+                    setSelectedCalendarId(null);
                 }}
                 onSubmit={handleUpdateCalendar}
                 onDelete={handleDeleteCalendar}
-                calendar={selectedCalendar}
+                calendarId={selectedCalendarId}
                 isLoading={isSubmitting}
                 isDeleting={isDeletingCalendar}
             />

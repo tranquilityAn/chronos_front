@@ -4,12 +4,15 @@ import Calendar from "../pages/CalendarPage.jsx";
 import Login from "../pages/auth/Login.jsx";
 import Register from "../pages/auth/Register.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
+import CalendarInvitePage from "../pages/CalendarInvitePage.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Calendar /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/profile", element: <ProfilePage /> },
+  { path: "/calendar-invite/accept", element: <CalendarInvitePage /> },
+  { path: "/calendar-invite/decline", element: <CalendarInvitePage /> },
 ]);
 
 export default router;

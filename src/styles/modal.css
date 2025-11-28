@@ -147,6 +147,14 @@
     box-shadow: 0 0 0 2px rgba(237, 233, 134, 0.15);
 }
 
+.modal-form__input:disabled,
+.modal-form__select:disabled,
+.modal-form__textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(237, 233, 134, 0.05);
+}
+
 .modal-form__input::placeholder,
 .modal-form__textarea::placeholder {
     color: var(--second-text-color);
@@ -300,6 +308,117 @@
     font-size: 14px;
     color: var(--main-text-color);
     line-height: 1.5;
+}
+
+/* ===== MODAL FORM SECTIONS ===== */
+.modal-form__section {
+    padding: 16px 0;
+    border-top: 1px solid rgba(237, 233, 134, 0.1);
+}
+
+.modal-form__section:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.modal-form__section-title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--main-text-color);
+}
+
+/* ===== MEMBERS LIST ===== */
+.members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(237, 233, 134, 0.05);
+    border: 1px solid rgba(237, 233, 134, 0.15);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+
+.member-item:hover {
+    background: rgba(237, 233, 134, 0.1);
+    border-color: rgba(237, 233, 134, 0.25);
+}
+
+.member-item__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-item__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--main-text-color);
+}
+
+.member-item__email {
+    font-size: 12px;
+    color: var(--second-text-color);
+}
+
+.member-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.member-item__role {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(237, 233, 134, 0.2);
+    color: var(--second-color);
+}
+
+.member-item__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== STATUS BADGES ===== */
+.status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.status-badge--accepted {
+    background: rgba(122, 199, 79, 0.2);
+    color: #7AC74F;
+}
+
+.status-badge--pending {
+    background: rgba(245, 176, 65, 0.2);
+    color: #F5B041;
+}
+
+.status-badge--declined {
+    background: rgba(232, 106, 93, 0.2);
+    color: #E86A5D;
 }
 
 /* ===== TOAST ===== */
