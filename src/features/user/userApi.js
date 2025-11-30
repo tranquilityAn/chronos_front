@@ -36,3 +36,9 @@ export const getUserByEmail = async (email) => {
   return data;
 };
 
+// DELETE /api/auth/ - удалить текущего пользователя
+export const deleteCurrentUser = async () => {
+  const { data } = await api.delete('api/auth/');
+  return data;
+};
+

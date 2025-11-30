@@ -292,6 +292,16 @@
     border-color: var(--second-color);
 }
 
+.profile-page__btn--danger {
+    background: var(--error-color);
+    color: var(--main-color);
+}
+
+.profile-page__btn--danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(232, 106, 93, 0.3);
+}
+
 .profile-page__loading,
 .profile-page__error {
     display: flex;
@@ -304,6 +314,50 @@
 
 .profile-page__error {
     color: var(--error-color);
+}
+
+/* Модальное окно подтверждения удаления */
+.profile-page__modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.profile-page__modal {
+    background: var(--alt-main-color);
+    border-radius: 6px;
+    padding: 32px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.profile-page__modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--second-color);
+    margin: 0 0 16px 0;
+}
+
+.profile-page__modal-text {
+    font-size: 16px;
+    color: var(--main-text-color);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.profile-page__modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
 }
 
 /* Адаптивность */

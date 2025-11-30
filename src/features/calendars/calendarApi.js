@@ -100,7 +100,14 @@ export const updateCalendarMemberRole = async (calendarId, userId, { role }) => 
 
 /**
  * GET /api/calendars/accept-invite?token=...
- * Сервер возвращает: { calendar: { id, name, color }, role }
+ * 
+ * Возможные ответы сервера:
+ * - Успешное принятие: 200 OK с { calendar: { id, name, color }, role }
+ * - Токен уже использован/протух: 400 Bad Request с { error: "TOKEN_INVALID_OR_EXPIRED", message: "The token is invalid or has expired" }
+ *   Примечание: если токен уже использован, но пользователь уже является участником календаря,
+ *   это не является реальной ошибкой - пользователь уже имеет доступ к календарю.
+ * - Пользователь не авторизован: 401 Unauthorized
+ * - Другие ошибки: 403 Forbidden с различными сообщениями (например, "No pending invite found for this user")
  */
 export const acceptCalendarInvite = async (token) => {
     console.log("API: Accepting calendar invite", { token: token?.substring(0, 10) + "..." });

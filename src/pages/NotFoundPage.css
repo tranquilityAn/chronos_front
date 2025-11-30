@@ -1,0 +1,108 @@
+@import url("../styles/global.css");
+
+/* === ОБОЛОЧКА === */
+.notfound-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--main-color);
+  color: var(--main-text-color);
+  margin: 0;
+  padding: 0;
+}
+
+/* === ХЕДЕР === */
+.notfound-header {
+  background-color: #1b1b1b;
+  display: flex;
+  height: 7vh;
+  width: 100%;
+}
+
+.notfound-brand {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--second-color);
+  align-self: center;
+  margin-left: 20px;
+}
+
+/* === ОСНОВНАЯ ЧАСТЬ === */
+.notfound-main {
+  display: flex;
+  height: 93vh;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.notfound-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  max-width: 600px;
+  padding: 20px;
+}
+
+/* === ИЗОБРАЖЕНИЕ === */
+.notfound-image {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+}
+
+/* === ЗАГОЛОВОК === */
+.notfound-title {
+  font-size: 30px;
+  color: var(--main-text-color);
+  margin: 0;
+}
+
+/* === ТЕКСТ === */
+.notfound-text {
+  color: var(--second-text-color);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* === ССЫЛКА === */
+.notfound-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: var(--second-color);
+  color: var(--main-color);
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 16px;
+  transition: box-shadow 0.4s ease-in-out;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.notfound-link:hover {
+  box-shadow: 0 0 9px var(--second-color);
+}
+
+/* === АУДИО === */
+.notfound-audio {
+  display: none;
+}
+
+/* === АДАПТИВ === */
+@media (max-width: 600px) {
+  .notfound-image {
+    max-width: 200px;
+  }
+
+  .notfound-title {
+    font-size: 24px;
+  }
+
+  .notfound-content {
+    padding: 16px;
+  }
+}
+

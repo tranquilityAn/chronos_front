@@ -5,6 +5,7 @@ import Login from "../pages/auth/Login.jsx";
 import Register from "../pages/auth/Register.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import CalendarInvitePage from "../pages/CalendarInvitePage.jsx";
+import NotFoundPage from "../pages/NotFoundPage.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Calendar /> },
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
   { path: "/profile", element: <ProfilePage /> },
   { path: "/calendar-invite/accept", element: <CalendarInvitePage /> },
   { path: "/calendar-invite/decline", element: <CalendarInvitePage /> },
+  { path: "*", element: <NotFoundPage /> },
 ]);
 
 export default router;

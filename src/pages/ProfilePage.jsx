@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, updateUser, updateUserAvatar } from '../features/user/userApi';
+import { getCurrentUser, updateUser, updateUserAvatar, deleteCurrentUser } from '../features/user/userApi';
 import { logout, updateUser as updateUserAction } from '../features/auth/authSlice';
 import HeaderBar from '../components/calendar/HeaderBar';
 import Toast, { useToast } from '../components/ui/Toast';
@@ -22,6 +22,8 @@ export default function ProfilePage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
+    const [isDeletingUser, setIsDeletingUser] = useState(false);
+    const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         country: '',
@@ -153,6 +155,33 @@ export default function ProfilePage() {
     const handleLogout = () => {
         dispatch(logout());
         navigate('/login');
+    };
+
+    const handleDeleteClick = () => {
+        setIsConfirmDeleteOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            setIsDeletingUser(true);
+            await deleteCurrentUser();
+            dispatch(logout());
+            showToast('Account deleted successfully', 'success');
+            navigate('/login', { replace: true });
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            const errorMessage = error?.response?.data?.error || 
+                                error?.response?.data?.message || 
+                                'Failed to delete account';
+            showToast(errorMessage, 'error');
+        } finally {
+            setIsDeletingUser(false);
+            setIsConfirmDeleteOpen(false);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setIsConfirmDeleteOpen(false);
     };
 
     const getInitials = (name, email) => {
@@ -391,18 +420,55 @@ export default function ProfilePage() {
                                         </button>
                                     </>
                                 ) : (
-                                    <button
-                                        className="profile-page__btn profile-page__btn--edit"
-                                        onClick={() => setIsEditing(true)}
-                                    >
-                                        Edit
-                                    </button>
+                                    <>
+                                        <button
+                                            className="profile-page__btn profile-page__btn--edit"
+                                            onClick={() => setIsEditing(true)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="profile-page__btn profile-page__btn--danger"
+                                            onClick={handleDeleteClick}
+                                            disabled={isDeletingUser}
+                                        >
+                                            Delete user
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Модальное окно подтверждения удаления */}
+            {isConfirmDeleteOpen && (
+                <div className="profile-page__modal-backdrop">
+                    <div className="profile-page__modal">
+                        <h2 className="profile-page__modal-title">Delete account</h2>
+                        <p className="profile-page__modal-text">
+                            Are you sure you want to delete your account? This action cannot be undone.
+                        </p>
+                        <div className="profile-page__modal-actions">
+                            <button
+                                className="profile-page__btn profile-page__btn--cancel"
+                                onClick={handleCancelDelete}
+                                disabled={isDeletingUser}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="profile-page__btn profile-page__btn--danger"
+                                onClick={handleConfirmDelete}
+                                disabled={isDeletingUser}
+                            >
+                                {isDeletingUser ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toast уведомления */}
             <Toast
