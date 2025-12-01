@@ -3,7 +3,7 @@
 /* ===== BASE LAYOUT ===== */
 .calendar-page {
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
     background: var(--main-color);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
     color: var(--main-text-color);
@@ -598,4 +598,156 @@
 
 .cal-grid__event-more:hover {
     text-decoration: underline;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet: 768px - 1199px */
+@media (max-width: 1199px) {
+    .sidebar {
+        width: 220px;
+        padding: 16px;
+    }
+
+    .headerbar {
+        padding: 0 16px;
+    }
+
+    .headerbar__month {
+        font-size: 18px;
+    }
+}
+
+/* Mobile: < 768px */
+@media (max-width: 767px) {
+    .calendar-page {
+        flex-direction: column;
+    }
+
+    .calendar-main {
+        width: 100%;
+    }
+
+    /* Sidebar becomes fixed overlay on mobile */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 260px;
+        max-width: 80%;
+        z-index: 1000;
+        background: var(--alt-main-color);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar--mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 900;
+        display: none;
+    }
+
+    .sidebar-overlay--visible {
+        display: block;
+    }
+
+    /* HeaderBar adjustments */
+    .headerbar {
+        padding: 0 12px;
+        height: 50px;
+    }
+
+    .headerbar__month {
+        font-size: 16px;
+    }
+
+    .headerbar__brand {
+        font-size: 24px;
+    }
+
+    .headerbar__user-name {
+        display: none;
+    }
+
+    .headerbar__burger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: 1px solid rgba(237, 233, 134, 0.3);
+        color: var(--second-color);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.15s ease;
+        margin-right: 12px;
+    }
+
+    .headerbar__burger:hover {
+        background: rgba(237, 233, 134, 0.15);
+        border-color: var(--second-color);
+    }
+
+    /* Calendar Grid adjustments */
+    .cal-grid {
+        padding: 8px 12px;
+        gap: 3px;
+    }
+
+    .cal-grid__weekday {
+        font-size: 11px;
+    }
+
+    .cal-grid__cell {
+        padding: 4px;
+    }
+
+    .cal-grid__cell-date {
+        font-size: 12px;
+    }
+
+    .cal-grid__cell-date--today {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+
+    .cal-grid__event-row {
+        font-size: 10px;
+        padding: 1px 3px 1px 0;
+    }
+
+    .cal-grid__event-type {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+
+    .cal-grid__event-time {
+        font-size: 9px;
+    }
+
+    .cal-grid__event-title {
+        font-size: 10px;
+    }
+
+    .cal-grid__event-more {
+        font-size: 10px;
+    }
+}
+
+/* Desktop: hide burger button */
+@media (min-width: 768px) {
+    .headerbar__burger {
+        display: none;
+    }
 }

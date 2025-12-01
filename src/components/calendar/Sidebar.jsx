@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
  *   onAddEvent: () => void,
  *   onAddCalendar: () => void,
  *   onEditCalendar: (calendar: object) => void,
+ *   isMobileOpen?: boolean,
+ *   onCloseMobile?: () => void,
  * }} props
  */
 export default function Sidebar({
@@ -20,6 +22,8 @@ export default function Sidebar({
     onAddEvent,
     onAddCalendar,
     onEditCalendar,
+    isMobileOpen = false,
+    onCloseMobile,
 }) {
     const navigate = useNavigate();
     const [areCalendarsOpen, setAreCalendarsOpen] = useState(true);
@@ -29,9 +33,18 @@ export default function Sidebar({
     };
 
     return (
-        <aside className="sidebar">
-            {/* Назва сервісу зверху */}
-            <div className="sidebar__brand">
+        <>
+            {/* Overlay для мобильной версии */}
+            {isMobileOpen && onCloseMobile && (
+                <div 
+                    className={`sidebar-overlay ${isMobileOpen ? 'sidebar-overlay--visible' : ''}`}
+                    onClick={onCloseMobile}
+                />
+            )}
+            
+            <aside className={`sidebar ${isMobileOpen ? 'sidebar--mobile-open' : ''}`}>
+                {/* Назва сервісу зверху */}
+                <div className="sidebar__brand">
                 <span 
                     className="sidebar__brand-title"
                     onClick={handleBrandClick}
@@ -155,5 +168,6 @@ export default function Sidebar({
                 </button>
             </div>
         </aside>
+        </>
     );
 }

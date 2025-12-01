@@ -98,9 +98,10 @@
 }
 
 /* === АДАПТИВ === */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .notfound-image {
-    max-width: 200px;
+    max-width: 280px;
+    width: 100%;
   }
 
   .notfound-title {
@@ -108,6 +109,11 @@
   }
 
   .notfound-content {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  .notfound-main {
     padding: 16px;
   }
 }

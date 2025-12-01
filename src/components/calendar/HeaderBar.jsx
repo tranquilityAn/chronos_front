@@ -9,7 +9,8 @@ import UserAvatar from '../ui/UserAvatar';
  *   onNextMonth: () => void,
  *   onToday: () => void,
  *   onLogout?: () => void,
- *   isLoading?: boolean
+ *   isLoading?: boolean,
+ *   onToggleSidebar?: () => void
  * }} props
  */
 export default function HeaderBar({ 
@@ -18,7 +19,8 @@ export default function HeaderBar({
     onNextMonth,
     onToday,
     onLogout, 
-    isLoading 
+    isLoading,
+    onToggleSidebar
 }) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -56,6 +58,16 @@ export default function HeaderBar({
         <header className="headerbar">
             {/* Ліво: навігація по місяцях */}
             <div className="headerbar__left">
+                {onToggleSidebar && (
+                    <button 
+                        className="headerbar__burger"
+                        onClick={onToggleSidebar}
+                        title="Toggle sidebar"
+                        aria-label="Toggle sidebar"
+                    >
+                        ☰
+                    </button>
+                )}
                 <div className="headerbar__nav">
                     <button 
                         className="headerbar__nav-btn" 

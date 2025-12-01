@@ -68,6 +68,7 @@ export default function CalendarPage() {
     const [activeDate, setActiveDate] = useState(new Date());
     const [visibleRange, setVisibleRange] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     // Обработчик клика на ячейку дня - открывает модальное окно создания события
     const handleDateClick = useCallback((date) => {
@@ -338,6 +339,8 @@ export default function CalendarPage() {
                 onAddEvent={() => setIsEventModalOpen(true)}
                 onAddCalendar={() => setIsCalendarModalOpen(true)}
                 onEditCalendar={handleEditCalendar}
+                isMobileOpen={isSidebarOpen}
+                onCloseMobile={() => setIsSidebarOpen(false)}
             />
 
             <div className="calendar-main">
@@ -348,6 +351,7 @@ export default function CalendarPage() {
                     onToday={handleToday}
                     onLogout={handleLogout}
                     isLoading={isLoading}
+                    onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />
                 <CalendarGrid
                     activeDate={activeDate}
