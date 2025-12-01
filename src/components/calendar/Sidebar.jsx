@@ -22,8 +22,7 @@ export default function Sidebar({
     onEditCalendar,
 }) {
     const navigate = useNavigate();
-    const [isMyOpen, setIsMyOpen] = useState(true);
-    const [isSharedOpen, setIsSharedOpen] = useState(true);
+    const [areCalendarsOpen, setAreCalendarsOpen] = useState(true);
 
     const handleBrandClick = () => {
         navigate('/');
@@ -47,7 +46,7 @@ export default function Sidebar({
             <div className="sidebar__section">
                 <button
                     className="sidebar__section-header"
-                    onClick={() => setIsMyOpen((v) => !v)}
+                    onClick={() => setAreCalendarsOpen((v) => !v)}
                 >
                     <span className="sidebar__section-title">Calendars</span>
                 </button>
@@ -55,17 +54,17 @@ export default function Sidebar({
                 <div className="sidebar__subsection">
                     <button
                         className="sidebar__subsection-header"
-                        onClick={() => setIsMyOpen((v) => !v)}
+                        onClick={() => setAreCalendarsOpen((v) => !v)}
                     >
                         <span className="sidebar__subsection-title">
                             your calendars
                         </span>
                         <span className="sidebar__chevron">
-                            {isMyOpen ? "▾" : "▸"}
+                            {areCalendarsOpen ? "▾" : "▸"}
                         </span>
                     </button>
 
-                    {isMyOpen && (
+                    {areCalendarsOpen && (
                         <ul className="sidebar__list">
                             {myCalendars.map((c) => (
                                 <li key={c.id} className="sidebar__item">
@@ -102,17 +101,17 @@ export default function Sidebar({
                 <div className="sidebar__subsection">
                     <button
                         className="sidebar__subsection-header"
-                        onClick={() => setIsSharedOpen((v) => !v)}
+                        onClick={() => setAreCalendarsOpen((v) => !v)}
                     >
                         <span className="sidebar__subsection-title">
                             shared calendars
                         </span>
                         <span className="sidebar__chevron">
-                            {isSharedOpen ? "▾" : "▸"}
+                            {areCalendarsOpen ? "▾" : "▸"}
                         </span>
                     </button>
 
-                    {isSharedOpen && (
+                    {areCalendarsOpen && (
                         <ul className="sidebar__list">
                             {sharedCalendars.map((c) => (
                                 <li key={c.id} className="sidebar__item">

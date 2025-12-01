@@ -100,7 +100,7 @@ export default function CalendarPage() {
     // Модальные окна
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isEditCalendarModalOpen, setIsEditCalendarModalOpen] = useState(false);
-    const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeletingCalendar, setIsDeletingCalendar] = useState(false);
@@ -177,7 +177,7 @@ export default function CalendarPage() {
 
     // Редактирование календаря
     const handleEditCalendar = useCallback((calendar) => {
-        setSelectedCalendarId(calendar?.id || null);
+        setSelectedCalendar(calendar || null);
         setIsEditCalendarModalOpen(true);
     }, []);
 
@@ -187,7 +187,7 @@ export default function CalendarPage() {
         try {
             await updateCalendar(calendarId, data);
             setIsEditCalendarModalOpen(false);
-            setSelectedCalendarId(null);
+            setSelectedCalendar(null);
             showToast("Calendar updated successfully!", "success");
             // Перезагружаем список календарей
             dispatch(loadCalendars());
@@ -205,7 +205,7 @@ export default function CalendarPage() {
         try {
             await deleteCalendar(calendarId);
             setIsEditCalendarModalOpen(false);
-            setSelectedCalendarId(null);
+            setSelectedCalendar(null);
             showToast("Calendar deleted successfully!", "success");
             // Перезагружаем список календарей
             dispatch(loadCalendars());
@@ -295,10 +295,11 @@ export default function CalendarPage() {
         try {
             const result = await updateEvent(calendarId, eventId, data);
             // Обновляем selectedEvent с новыми данными
+            // updateEvent возвращает событие напрямую, а не обернутое в { event: ... }
             setSelectedEvent((prev) => ({
                 ...prev,
-                ...result.event,
-                id: result.event?._id || result.event?.id || eventId,
+                ...result,
+                id: result?._id || result?.id || eventId,
             }));
             showToast("Event updated successfully!", "success");
             // Перезагружаем события
@@ -386,11 +387,11 @@ export default function CalendarPage() {
                 isOpen={isEditCalendarModalOpen}
                 onClose={() => {
                     setIsEditCalendarModalOpen(false);
-                    setSelectedCalendarId(null);
+                    setSelectedCalendar(null);
                 }}
                 onSubmit={handleUpdateCalendar}
                 onDelete={handleDeleteCalendar}
-                calendarId={selectedCalendarId}
+                calendar={selectedCalendar}
                 isLoading={isSubmitting}
                 isDeleting={isDeletingCalendar}
             />

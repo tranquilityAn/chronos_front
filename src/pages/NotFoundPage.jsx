@@ -5,9 +5,10 @@ import "./NotFoundPage.css";
 export default function NotFoundPage() {
   const audioRef = useRef(null);
 
-  useEffect(() => {
-    // Принудительно воспроизводим аудио при загрузке страницы
+  const playAudio = () => {
     if (audioRef.current) {
+      // Сбрасываем текущее время, чтобы воспроизвести с начала
+      audioRef.current.currentTime = 0;
       const playPromise = audioRef.current.play();
       
       // Обрабатываем промис, так как play() возвращает Promise
@@ -17,11 +18,16 @@ export default function NotFoundPage() {
             // Воспроизведение успешно началось
           })
           .catch((error) => {
-            // Автоплей заблокирован браузером - это нормально
-            console.log("Audio autoplay was prevented:", error);
+            // Воспроизведение заблокировано - это нормально
+            console.log("Audio play was prevented:", error);
           });
       }
     }
+  };
+
+  useEffect(() => {
+    // Принудительно воспроизводим аудио при загрузке страницы
+    playAudio();
   }, []);
 
   return (
@@ -35,6 +41,7 @@ export default function NotFoundPage() {
             src="/404.png"
             alt="404"
             className="notfound-image"
+            onClick={playAudio}
           />
           <h1 className="notfound-title">This page does not exist</h1>
           <p className="notfound-text">

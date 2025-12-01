@@ -128,6 +128,7 @@
 }
 
 .headerbar__today-btn {
+    font-weight: bold;
     padding: 6px 14px;
     height: 32px;
     background: transparent;
@@ -136,7 +137,6 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 13px;
-    font-weight: 500;
     transition: all 0.15s ease;
 }
 
@@ -562,6 +562,10 @@
 .cal-grid__event-row--task .cal-grid__event-type {
     background: rgba(122, 199, 79, 0.25);
     color: #7AC74F;
+}
+
+.cal-grid__event-row--completed {
+    opacity: 0.5;
 }
 
 .cal-grid__event-row--default .cal-grid__event-type {

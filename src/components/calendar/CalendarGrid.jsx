@@ -191,10 +191,11 @@ export default function CalendarGrid({
                                     const time = formatEventTime(ev);
                                     const typeClass = getEventTypeClass(ev.type);
                                     const typeLabel = getEventTypeLabel(ev.type);
+                                    const isCompletedTask = ev.type === "task" && ev.isDone === true;
                                     return (
                                         <div
                                             key={ev.id}
-                                            className={`cal-grid__event-row cal-grid__event-row--${typeClass}`}
+                                            className={`cal-grid__event-row cal-grid__event-row--${typeClass}${isCompletedTask ? " cal-grid__event-row--completed" : ""}`}
                                             title={`${ev.title}${time ? ` at ${time}` : ""}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();

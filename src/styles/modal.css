@@ -221,8 +221,8 @@
 }
 
 .modal-form__color-btn--selected {
-    border-color: var(--main-text-color);
-    box-shadow: 0 0 0 2px var(--main-color), 0 0 0 4px currentColor;
+    border-color: #fff;
+   
 }
 
 /* ===== ERROR MESSAGE ===== */
@@ -709,6 +709,66 @@
 
 .event-detail__status--pending {
     color: var(--second-color);
+}
+
+.event-detail__status-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.event-detail__toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.event-detail__toggle-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--second-color);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.event-detail__toggle-input:checked {
+    background: var(--second-color);
+    border-color: var(--second-color);
+}
+
+.event-detail__toggle-input:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--main-color);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.event-detail__toggle-input:hover:not(:disabled) {
+    border-color: var(--second-color);
+    filter: brightness(1.1);
+}
+
+.event-detail__toggle-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.event-detail__toggle-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--main-text-color);
 }
 
 .event-detail__description {

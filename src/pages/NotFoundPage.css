@@ -51,6 +51,12 @@
   max-width: 280px;
   width: 100%;
   height: auto;
+  cursor: pointer;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.notfound-image:hover {
+  opacity: 0.8;
 }
 
 /* === ЗАГОЛОВОК === */
@@ -105,4 +111,5 @@
     padding: 16px;
   }
 }
+
 

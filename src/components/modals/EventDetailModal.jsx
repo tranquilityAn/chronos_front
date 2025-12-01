@@ -160,6 +160,15 @@ export default function EventDetailModal({
         setError("");
     };
 
+    const handleToggleCompleted = async () => {
+        if (isUpdating || !event || event.type !== "task") return;
+        try {
+            await onUpdate(event.calendarId, event.id, { isDone: !event.isDone });
+        } catch (err) {
+            // Ошибка обрабатывается в родительском компоненте
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title={null} closePosition="right">
             <div className="event-detail">
@@ -325,9 +334,19 @@ export default function EventDetailModal({
                                     </div>
                                     <div className="event-detail__row">
                                         <span className="event-detail__label">Status</span>
-                                        <span className={`event-detail__value event-detail__status--${event.isDone ? "done" : "pending"}`}>
-                                            {event.isDone ? "Completed" : "Pending"}
-                                        </span>
+                                        <div className="event-detail__status-toggle">
+                                            <label htmlFor="task-completed-toggle" className="event-detail__toggle-label">
+                                                <input
+                                                    type="checkbox"
+                                                    id="task-completed-toggle"
+                                                    checked={event?.isDone === true}
+                                                    onChange={handleToggleCompleted}
+                                                    disabled={isUpdating}
+                                                    className="event-detail__toggle-input"
+                                                />
+                                                <span className="event-detail__toggle-text">Completed</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </>
                             )}

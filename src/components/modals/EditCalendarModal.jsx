@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Modal from "../ui/Modal";
+import Toast, { useToast } from "../ui/Toast";
 import { 
-    getCalendar, 
     updateCalendar, 
     deleteCalendar,
     inviteToCalendar,
@@ -10,6 +10,7 @@ import {
     removeCalendarMember,
     updateCalendarMemberRole
 } from "../../features/calendars/calendarApi";
+import "./EditCalendarModal.css";
 
 const COLORS = [
     "#EDE986", // yellow (accent)
@@ -29,7 +30,7 @@ const COLORS = [
  *   onClose: () => void,
  *   onSubmit: (calendarId: string, data: { name: string, description?: string, color?: string }) => Promise<void>,
  *   onDelete: (calendarId: string) => Promise<void>,
- *   calendarId: string | null,
+ *   calendar: { id: string, name: string, description?: string, color?: string, role: "owner" | "editor" | "viewer", createdAt?: string, updatedAt?: string } | null,
  *   isLoading?: boolean,
  *   isDeleting?: boolean
  * }} props
@@ -39,15 +40,15 @@ export default function EditCalendarModal({
     onClose, 
     onSubmit, 
     onDelete, 
-    calendarId, 
+    calendar: calendarProp, 
     isLoading, 
     isDeleting 
 }) {
     const currentUser = useSelector((state) => state.auth.user);
+    const { toast, showToast, hideToast } = useToast();
     
     const [calendar, setCalendar] = useState(null);
     const [members, setMembers] = useState([]);
-    const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
     const [isLoadingMembers, setIsLoadingMembers] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -55,7 +56,7 @@ export default function EditCalendarModal({
         color: COLORS[0],
     });
     const [error, setError] = useState("");
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     
     // Sharing state
     const [showShareForm, setShowShareForm] = useState(false);
@@ -67,52 +68,37 @@ export default function EditCalendarModal({
     // Member management state
     const [removingMemberId, setRemovingMemberId] = useState(null);
     const [updatingMemberId, setUpdatingMemberId] = useState(null);
-    const [isOwner, setIsOwner] = useState(false);
+    
+    // Remove member confirmation modal state
+    const [memberToRemove, setMemberToRemove] = useState(null);
+    const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
+    const [isRemovingMember, setIsRemovingMember] = useState(false);
 
-    // Загрузка данных календаря и участников при открытии
+    // Определение роли на основе calendar.role
+    const isOwner = calendarProp?.role === "owner";
+    const isEditor = calendarProp?.role === "editor";
+    const isViewer = calendarProp?.role === "viewer";
+
+    // Инициализация calendar и formData при изменении calendarProp
     useEffect(() => {
-        if (calendarId && isOpen) {
-            loadCalendarData();
+        if (calendarProp && isOpen) {
+            setCalendar(calendarProp);
+            setFormData({
+                name: calendarProp.name || "",
+                description: calendarProp.description || "",
+                color: calendarProp.color || COLORS[0],
+            });
             loadMembers();
         }
-    }, [calendarId, isOpen]);
-
-    const loadCalendarData = async () => {
-        if (!calendarId) return;
-        
-        setIsLoadingCalendar(true);
-        setError("");
-        try {
-            const calendarData = await getCalendar(calendarId);
-            setCalendar(calendarData);
-            setFormData({
-                name: calendarData.name || "",
-                description: calendarData.description || "",
-                color: calendarData.color || COLORS[0],
-            });
-        } catch (err) {
-            console.error("Failed to load calendar:", err);
-            setError(err?.response?.data?.message || err.message || "Failed to load calendar");
-        } finally {
-            setIsLoadingCalendar(false);
-        }
-    };
+    }, [calendarProp, isOpen]);
 
     const loadMembers = async () => {
-        if (!calendarId) return;
+        if (!calendarProp?.id) return;
         
         setIsLoadingMembers(true);
         try {
-            const membersData = await listCalendarMembers(calendarId);
+            const membersData = await listCalendarMembers(calendarProp.id);
             setMembers(membersData || []);
-            
-            // Определяем роль текущего пользователя после загрузки members
-            const currentUserRole = membersData?.find(
-                (m) => m.user && m.user.id === currentUser?.id
-            )?.role || null;
-            
-            setIsOwner(currentUserRole === "owner");
-            console.log("Current user role:", currentUserRole, "isOwner:", currentUserRole === "owner");
         } catch (err) {
             console.error("Failed to load members:", err);
         } finally {
@@ -144,10 +130,10 @@ export default function EditCalendarModal({
             return;
         }
 
-        if (!calendarId) return;
+        if (!calendarProp?.id) return;
 
         try {
-            await onSubmit(calendarId, {
+            await onSubmit(calendarProp.id, {
                 name: formData.name.trim(),
                 description: formData.description.trim() || undefined,
                 color: formData.color || undefined,
@@ -159,25 +145,35 @@ export default function EditCalendarModal({
 
     const handleClose = () => {
         setError("");
-        setShowDeleteConfirm(false);
+        setIsDeleteConfirmOpen(false);
         setShowShareForm(false);
         setInviteEmail("");
         setInviteRole("viewer");
         setInviteError("");
-        setCalendar(null);
         setMembers([]);
+        setIsRemoveConfirmOpen(false);
+        setMemberToRemove(null);
         onClose();
     };
 
-    const handleDelete = async () => {
-        if (!calendarId) return;
+    const handleDeleteClick = () => {
+        setIsDeleteConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!calendarProp?.id) return;
         try {
-            await onDelete(calendarId);
-            setShowDeleteConfirm(false);
+            await onDelete(calendarProp.id);
+            setIsDeleteConfirmOpen(false);
             handleClose();
         } catch (err) {
             setError(err?.response?.data?.message || err.message || "Failed to delete calendar");
+            // Don't close modal on error, let user see the error and try again or cancel
         }
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteConfirmOpen(false);
     };
 
     const handleInvite = async (e) => {
@@ -196,13 +192,13 @@ export default function EditCalendarModal({
             return;
         }
 
-        if (!calendarId) return;
+        if (!calendarProp?.id) return;
 
         setIsInviting(true);
         setInviteError("");
         try {
-            console.log("Inviting user:", { calendarId, email: inviteEmail.trim(), role: inviteRole });
-            const result = await inviteToCalendar(calendarId, {
+            console.log("Inviting user:", { calendarId: calendarProp.id, email: inviteEmail.trim(), role: inviteRole });
+            const result = await inviteToCalendar(calendarProp.id, {
                 email: inviteEmail.trim(),
                 role: inviteRole,
             });
@@ -229,30 +225,44 @@ export default function EditCalendarModal({
         }
     };
 
-    const handleRemoveMember = async (userId) => {
-        if (!calendarId || !isOwner) return;
-        
-        if (!window.confirm("Are you sure you want to remove this member?")) {
-            return;
-        }
+    const handleRemoveMemberClick = (member) => {
+        if (!calendarProp?.id || !isOwner) return;
+        setMemberToRemove(member);
+        setIsRemoveConfirmOpen(true);
+    };
 
-        setRemovingMemberId(userId);
+    const handleConfirmRemoveMember = async () => {
+        if (!memberToRemove || !calendarProp?.id || !isOwner) return;
+
+        setIsRemovingMember(true);
         try {
-            await removeCalendarMember(calendarId, userId);
+            await removeCalendarMember(calendarProp.id, memberToRemove.user.id);
             await loadMembers();
+            showToast("Member removed successfully", "success");
+            setIsRemoveConfirmOpen(false);
+            setMemberToRemove(null);
         } catch (err) {
-            setError(err?.response?.data?.message || err.message || "Failed to remove member");
+            const errorMessage = err?.response?.data?.error ||
+                                err?.response?.data?.message ||
+                                err?.message ||
+                                "Failed to remove member";
+            showToast(errorMessage, "error");
         } finally {
-            setRemovingMemberId(null);
+            setIsRemovingMember(false);
         }
     };
 
+    const handleCancelRemoveMember = () => {
+        setIsRemoveConfirmOpen(false);
+        setMemberToRemove(null);
+    };
+
     const handleUpdateMemberRole = async (userId, newRole) => {
-        if (!calendarId || !isOwner) return;
+        if (!calendarProp?.id || !isOwner) return;
 
         setUpdatingMemberId(userId);
         try {
-            await updateCalendarMemberRole(calendarId, userId, { role: newRole });
+            await updateCalendarMemberRole(calendarProp.id, userId, { role: newRole });
             await loadMembers();
         } catch (err) {
             setError(err?.response?.data?.message || err.message || "Failed to update member role");
@@ -284,17 +294,7 @@ export default function EditCalendarModal({
         return roleMap[role] || role;
     };
 
-    if (!calendarId || !isOpen) return null;
-
-    if (isLoadingCalendar) {
-        return (
-            <Modal isOpen={isOpen} onClose={handleClose} title="Edit Calendar">
-                <div style={{ padding: "20px", textAlign: "center" }}>
-                    Loading calendar...
-                </div>
-            </Modal>
-        );
-    }
+    if (!calendarProp || !isOpen) return null;
 
     if (!calendar) {
         return (
@@ -307,6 +307,7 @@ export default function EditCalendarModal({
     }
 
     return (
+        <>
         <Modal isOpen={isOpen} onClose={handleClose} title="Edit Calendar">
             <div className="modal-form">
                 <form onSubmit={handleSubmit}>
@@ -314,29 +315,6 @@ export default function EditCalendarModal({
                     <div className="modal-form__section">
                         <h3 className="modal-form__section-title">Calendar Information</h3>
                         
-                        {/* ID и тип (readonly) */}
-                        <div className="modal-form__group">
-                            <label className="modal-form__label">ID</label>
-                            <input
-                                type="text"
-                                className="modal-form__input"
-                                value={calendar.id || ""}
-                                readOnly
-                                disabled
-                            />
-                        </div>
-
-                        <div className="modal-form__group">
-                            <label className="modal-form__label">Type</label>
-                            <input
-                                type="text"
-                                className="modal-form__input"
-                                value={calendar.type || ""}
-                                readOnly
-                                disabled
-                            />
-                        </div>
-
                         {/* Название */}
                         <div className="modal-form__group">
                             <label className="modal-form__label">
@@ -350,6 +328,8 @@ export default function EditCalendarModal({
                                 value={formData.name}
                                 onChange={handleChange}
                                 maxLength={100}
+                                readOnly={isViewer}
+                                disabled={isViewer}
                                 autoFocus
                             />
                         </div>
@@ -365,65 +345,78 @@ export default function EditCalendarModal({
                                 onChange={handleChange}
                                 maxLength={2000}
                                 rows={3}
+                                readOnly={isViewer}
+                                disabled={isViewer}
                             />
                         </div>
 
                         {/* Цвет */}
-                        <div className="modal-form__group">
+                        <div className="modal-form__group modal-form__group--color">
                             <label className="modal-form__label">Color</label>
-                            <div className="modal-form__colors">
-                                <button
-                                    type="button"
-                                    className={`modal-form__color-btn ${
-                                        !formData.color ? "modal-form__color-btn--selected" : ""
-                                    }`}
-                                    style={{ 
-                                        backgroundColor: "transparent",
-                                        border: "2px dashed var(--second-text-color)"
-                                    }}
-                                    onClick={() => handleColorSelect("")}
-                                    title="No color"
-                                >
-                                    ✕
-                                </button>
-                                {COLORS.map((color) => (
+                            {isViewer ? (
+                                <div className="modal-form__color-display">
+                                    <div 
+                                        className="modal-form__color-preview"
+                                        style={{ 
+                                            backgroundColor: formData.color || "transparent",
+                                            width: "28px",
+                                            height: "28px",
+                                            borderRadius: "50%",
+                                            border: formData.color ? "2px solid var(--main-text-color)" : "2px dashed var(--second-text-color)",
+                                            display: "inline-block"
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="modal-form__colors">
                                     <button
-                                        key={color}
                                         type="button"
                                         className={`modal-form__color-btn ${
-                                            formData.color === color ? "modal-form__color-btn--selected" : ""
+                                            !formData.color ? "modal-form__color-btn--selected" : ""
                                         }`}
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => handleColorSelect(color)}
-                                    />
-                                ))}
-                            </div>
+                                        style={{ 
+                                            backgroundColor: "transparent",
+                                            border: "2px dashed var(--second-text-color)"
+                                        }}
+                                        onClick={() => handleColorSelect("")}
+                                        title="No color"
+                                    >
+                                        ✕
+                                    </button>
+                                    {COLORS.map((color) => (
+                                        <button
+                                            key={color}
+                                            type="button"
+                                            className={`modal-form__color-btn ${
+                                                formData.color === color ? "modal-form__color-btn--selected" : ""
+                                            }`}
+                                            style={{ backgroundColor: color }}
+                                            onClick={() => handleColorSelect(color)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Даты создания и обновления (readonly) */}
-                        {calendar.createdAt && (
-                            <div className="modal-form__group">
-                                <label className="modal-form__label">Created At</label>
-                                <input
-                                    type="text"
-                                    className="modal-form__input"
-                                    value={new Date(calendar.createdAt).toLocaleString()}
-                                    readOnly
-                                    disabled
-                                />
-                            </div>
-                        )}
-
-                        {calendar.updatedAt && (
-                            <div className="modal-form__group">
-                                <label className="modal-form__label">Updated At</label>
-                                <input
-                                    type="text"
-                                    className="modal-form__input"
-                                    value={new Date(calendar.updatedAt).toLocaleString()}
-                                    readOnly
-                                    disabled
-                                />
+                        {/* Даты создания и обновления (как текст) */}
+                        {calendar && (calendar.createdAt || calendar.updatedAt) && (
+                            <div className="modal-form__group modal-form__group--meta">
+                                {calendar.createdAt && (
+                                    <div style={{ marginBottom: "8px" }}>
+                                        <span className="modal-form__label">Created at: </span>
+                                        <span className="modal-form__meta-value">
+                                            {new Date(calendar.createdAt).toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
+                                {calendar.updatedAt && (
+                                    <div>
+                                        <span className="modal-form__label">Updated at: </span>
+                                        <span className="modal-form__meta-value">
+                                            {new Date(calendar.updatedAt).toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -431,54 +424,29 @@ export default function EditCalendarModal({
                     {/* Ошибка */}
                     {error && <div className="modal-form__error">{error}</div>}
 
-                    {/* Подтверждение удаления */}
-                    {showDeleteConfirm ? (
-                        <div className="modal-form__delete-confirm">
-                            <p className="modal-form__delete-text">
-                                Are you sure you want to delete this calendar? This action cannot be undone.
-                            </p>
-                            <div className="modal-form__actions">
-                                <button
-                                    type="button"
-                                    className="modal-form__btn modal-form__btn--secondary"
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    disabled={isDeleting}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    className="modal-form__btn modal-form__btn--danger"
-                                    onClick={handleDelete}
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? "Deleting..." : "Yes, delete"}
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Кнопки */}
-                            <div className="modal-form__actions">
-                                <button
-                                    type="button"
-                                    className="modal-form__btn modal-form__btn--danger"
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                    disabled={isLoading || !isOwner}
-                                >
-                                    Delete Calendar
-                                </button>
-                                <div style={{ flex: 1 }} />
-                                <button
-                                    type="submit"
-                                    className="modal-form__btn modal-form__btn--primary"
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? "Saving..." : "Save Changes"}
-                                </button>
-                            </div>
-                        </>
-                    )}
+                    {/* Кнопки */}
+                    <div className="modal-form__actions">
+                        {isOwner && (
+                            <button
+                                type="button"
+                                className="modal-form__btn modal-form__btn--danger"
+                                onClick={handleDeleteClick}
+                                disabled={isLoading}
+                            >
+                                Delete Calendar
+                            </button>
+                        )}
+                        <div style={{ flex: 1 }} />
+                        {!isViewer && (
+                            <button
+                                type="submit"
+                                className="modal-form__btn modal-form__btn--primary"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Saving..." : "Save Changes"}
+                            </button>
+                        )}
+                    </div>
                 </form>
 
                 {/* Секция шаринга - вынесена из основной формы */}
@@ -606,8 +574,8 @@ export default function EditCalendarModal({
                                                     type="button"
                                                     className="modal-form__btn modal-form__btn--danger"
                                                     style={{ padding: "6px 12px", fontSize: "0.9em" }}
-                                                    onClick={() => handleRemoveMember(member.user.id)}
-                                                    disabled={removingMemberId === member.user.id}
+                                                    onClick={() => handleRemoveMemberClick(member)}
+                                                    disabled={removingMemberId === member.user.id || isRemovingMember}
                                                 >
                                                     {removingMemberId === member.user.id ? "Removing..." : "Remove"}
                                                 </button>
@@ -621,5 +589,72 @@ export default function EditCalendarModal({
                 </div>
             </div>
         </Modal>
+
+        {/* Модальное окно подтверждения удаления календаря */}
+        {isDeleteConfirmOpen && (
+            <div className="calendar-delete-modal-backdrop">
+                <div className="calendar-delete-modal">
+                    <h2 className="calendar-delete-modal__title">Delete calendar</h2>
+                    <p className="calendar-delete-modal__text">
+                        Are you sure you want to delete this calendar? This action cannot be undone.
+                    </p>
+                    <div className="calendar-delete-modal__actions">
+                        <button
+                            className="calendar-delete-modal__btn"
+                            onClick={handleCancelDelete}
+                            disabled={isDeleting}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="calendar-delete-modal__btn calendar-delete-modal__btn--danger"
+                            onClick={handleConfirmDelete}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Модальное окно подтверждения удаления участника */}
+        {isRemoveConfirmOpen && (
+            <div className="calendar-remove-modal-backdrop">
+                <div className="calendar-remove-modal">
+                    <h2 className="calendar-remove-modal__title">Remove member</h2>
+                    <p className="calendar-remove-modal__text">
+                        Are you sure you want to remove
+                        {memberToRemove?.user?.email ? ` ${memberToRemove.user.email} ` : " this user "}
+                        from the calendar?
+                    </p>
+                    <div className="calendar-remove-modal__actions">
+                        <button
+                            className="calendar-remove-modal__btn"
+                            onClick={handleCancelRemoveMember}
+                            disabled={isRemovingMember}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="calendar-remove-modal__btn calendar-remove-modal__btn--danger"
+                            onClick={handleConfirmRemoveMember}
+                            disabled={isRemovingMember}
+                        >
+                            {isRemovingMember ? "Removing..." : "Remove"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Toast уведомления */}
+        <Toast
+            message={toast.message}
+            type={toast.type}
+            isVisible={toast.isVisible}
+            onClose={hideToast}
+        />
+    </>
     );
 }
