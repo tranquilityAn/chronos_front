@@ -5,6 +5,7 @@ import Login from "../pages/auth/Login.jsx";
 import Register from "../pages/auth/Register.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import CalendarInvitePage from "../pages/CalendarInvitePage.jsx";
+import EventInvitePage from "../pages/EventInvitePage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
 
 const router = createBrowserRouter([
@@ -14,6 +15,8 @@ const router = createBrowserRouter([
   { path: "/profile", element: <ProfilePage /> },
   { path: "/calendar-invite/accept", element: <CalendarInvitePage /> },
   { path: "/calendar-invite/decline", element: <CalendarInvitePage /> },
+  { path: "/event-invite/accept", element: <EventInvitePage /> },
+  { path: "/event-invite/decline", element: <EventInvitePage /> },
   { path: "*", element: <NotFoundPage /> },
 ]);
 

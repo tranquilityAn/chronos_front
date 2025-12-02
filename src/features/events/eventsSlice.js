@@ -3,7 +3,8 @@ import { fetchEvents } from "./eventApi";
 
 export const loadEventsForRange = createAsyncThunk(
     "events/loadForRange",
-    async ({ calendarIds, from, to, types }) => {
+    async ({ calendarIds, from, to, types }, { getState }) => {
+        // 1) Загружаем обычные события по календарям
         const all = await Promise.all(
             calendarIds.map(async (id) => {
                 const data = await fetchEvents({
@@ -15,7 +16,49 @@ export const loadEventsForRange = createAsyncThunk(
                 return data.items.map((e) => ({ ...e, calendarId: id }));
             })
         );
-        return all.flat();
+        let events = all.flat();
+
+        // 2) Добавляем видимые shared events из state.sharedEvents
+        const state = getState();
+        const { items: sharedItems, selectedIds: selectedShared } = state.sharedEvents || {
+            items: [],
+            selectedIds: [],
+        };
+        const visibleSharedEvents = sharedItems.filter((ev) => {
+            const eventId = String(ev.id || ev._id);
+            return selectedShared.includes(eventId);
+        });
+
+        // Нормализуем shared events: они могут иметь вложенную структуру { event: {...} } или быть плоскими
+        const normalizedSharedEvents = visibleSharedEvents.map((ev) => {
+            // Если есть вложенный объект event, используем его, иначе используем сам ev
+            const eventData = ev.event || ev;
+            const eventId = ev.id || ev._id || eventData.id || eventData._id;
+            
+            // Извлекаем ownerId из createdBy (это владелец события)
+            const ownerId = eventData.createdBy || ev.createdBy || null;
+            const sharedOwnerId = ownerId ? String(ownerId) : null;
+            
+            // Проверяем, есть ли уже объект владельца (если бэкенд его вернул)
+            const sharedOwner = ev.owner || ev.sharedBy || ev.inviter || 
+                               (typeof ownerId === 'object' ? ownerId : null) || null;
+            
+            return {
+                ...eventData,
+                id: eventId,
+                // calendarId может быть в eventData или в ev
+                calendarId: eventData.calendarId || ev.calendarId || eventData.sourceCalendarId || null,
+                isShared: true,
+                sharedOwner: sharedOwner,  // объект владельца, если есть
+                sharedOwnerId: sharedOwnerId,  // ID владельца (строка)
+                sharedItemId: ev.id || ev._id || null,
+            };
+        });
+
+        // Объединяем обычные события и shared events
+        events = events.concat(normalizedSharedEvents);
+
+        return events;
     }
 );
 

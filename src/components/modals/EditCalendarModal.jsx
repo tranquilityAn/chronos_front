@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Modal from "../ui/Modal";
 import Toast, { useToast } from "../ui/Toast";
 import { 
@@ -10,6 +10,7 @@ import {
     removeCalendarMember,
     updateCalendarMemberRole
 } from "../../features/calendars/calendarApi";
+import { loadCalendars } from "../../features/calendars/calendarsSlice";
 import "./EditCalendarModal.css";
 
 const COLORS = [
@@ -45,6 +46,7 @@ export default function EditCalendarModal({
     isDeleting 
 }) {
     const currentUser = useSelector((state) => state.auth.user);
+    const dispatch = useDispatch();
     const { toast, showToast, hideToast } = useToast();
     
     const [calendar, setCalendar] = useState(null);
@@ -73,6 +75,10 @@ export default function EditCalendarModal({
     const [memberToRemove, setMemberToRemove] = useState(null);
     const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
     const [isRemovingMember, setIsRemovingMember] = useState(false);
+    
+    // Leave calendar confirmation modal state
+    const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
+    const [isLeavingCalendar, setIsLeavingCalendar] = useState(false);
 
     // Определение роли на основе calendar.role
     const isOwner = calendarProp?.role === "owner";
@@ -153,6 +159,7 @@ export default function EditCalendarModal({
         setMembers([]);
         setIsRemoveConfirmOpen(false);
         setMemberToRemove(null);
+        setIsLeaveConfirmOpen(false);
         onClose();
     };
 
@@ -255,6 +262,38 @@ export default function EditCalendarModal({
     const handleCancelRemoveMember = () => {
         setIsRemoveConfirmOpen(false);
         setMemberToRemove(null);
+    };
+
+    const handleLeaveCalendarClick = () => {
+        if (!calendarProp?.id || !currentUser) return;
+        setIsLeaveConfirmOpen(true);
+    };
+
+    const handleConfirmLeaveCalendar = async () => {
+        if (!calendarProp?.id || !currentUser) return;
+
+        setIsLeavingCalendar(true);
+        try {
+            await removeCalendarMember(calendarProp.id, currentUser.id);
+            // Обновляем список календарей
+            dispatch(loadCalendars());
+            showToast("You left the calendar successfully", "success");
+            setIsLeaveConfirmOpen(false);
+            // Закрываем модалку
+            handleClose();
+        } catch (err) {
+            const errorMessage = err?.response?.data?.error ||
+                                err?.response?.data?.message ||
+                                err?.message ||
+                                "Failed to leave calendar";
+            showToast(errorMessage, "error");
+        } finally {
+            setIsLeavingCalendar(false);
+        }
+    };
+
+    const handleCancelLeaveCalendar = () => {
+        setIsLeaveConfirmOpen(false);
     };
 
     const handleUpdateMemberRole = async (userId, newRole) => {
@@ -533,15 +572,16 @@ export default function EditCalendarModal({
                             {members.map((member) => {
                                 if (!member.user) return null;
                                 
-                                const isCurrentUser = member.user.id === currentUser?.id;
-                                const canManage = isOwner && !isCurrentUser && member.role !== "owner";
+                                const isMe = currentUser && member.user && String(member.user.id) === String(currentUser.id);
+                                const canManage = isOwner && !isMe && member.role !== "owner";
+                                const canLeave = !isOwner && isMe;
 
                                 return (
                                     <div key={member.user.id} className="member-item">
                                         <div className="member-item__info">
                                             <div className="member-item__name">
                                                 {member.user.name || member.user.email}
-                                                {isCurrentUser && (
+                                                {isMe && (
                                                     <span style={{ marginLeft: "8px", fontSize: "0.85em", color: "var(--second-text-color)" }}>
                                                         (You)
                                                     </span>
@@ -578,6 +618,20 @@ export default function EditCalendarModal({
                                                     disabled={removingMemberId === member.user.id || isRemovingMember}
                                                 >
                                                     {removingMemberId === member.user.id ? "Removing..." : "Remove"}
+                                                </button>
+                                            </div>
+                                        )}
+                                        
+                                        {canLeave && (
+                                            <div className="member-item__actions">
+                                                <button
+                                                    type="button"
+                                                    className="modal-form__btn modal-form__btn--danger"
+                                                    style={{ padding: "6px 12px", fontSize: "0.9em" }}
+                                                    onClick={handleLeaveCalendarClick}
+                                                    disabled={isLeavingCalendar}
+                                                >
+                                                    {isLeavingCalendar ? "Leaving..." : "Leave calendar"}
                                                 </button>
                                             </div>
                                         )}
@@ -642,6 +696,34 @@ export default function EditCalendarModal({
                             disabled={isRemovingMember}
                         >
                             {isRemovingMember ? "Removing..." : "Remove"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Модальное окно подтверждения выхода из календаря */}
+        {isLeaveConfirmOpen && (
+            <div className="calendar-remove-modal-backdrop">
+                <div className="calendar-remove-modal">
+                    <h2 className="calendar-remove-modal__title">Leave calendar</h2>
+                    <p className="calendar-remove-modal__text">
+                        Are you sure you want to leave this calendar?
+                    </p>
+                    <div className="calendar-remove-modal__actions">
+                        <button
+                            className="calendar-remove-modal__btn"
+                            onClick={handleCancelLeaveCalendar}
+                            disabled={isLeavingCalendar}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="calendar-remove-modal__btn calendar-remove-modal__btn--danger"
+                            onClick={handleConfirmLeaveCalendar}
+                            disabled={isLeavingCalendar}
+                        >
+                            {isLeavingCalendar ? "Leaving..." : "Leave"}
                         </button>
                     </div>
                 </div>

@@ -114,11 +114,12 @@ export default function DayEventsModal({
                             const time = formatEventTime(event);
                             const typeClass = getEventTypeClass(event.type);
                             const typeLabel = getEventTypeLabel(event.type);
+                            const isCompletedTask = event.type === "task" && (event.isDone === true || event.status === "completed" || event.completed === true);
                             
                             return (
                                 <div
                                     key={event.id}
-                                    className={`day-events__item day-events__item--${typeClass}`}
+                                    className={`day-events__item day-events__item--${typeClass}${isCompletedTask ? " day-events__item--completed" : ""}`}
                                     onClick={() => handleEventClick(event)}
                                     role="button"
                                     tabIndex={0}

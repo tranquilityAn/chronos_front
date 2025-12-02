@@ -6,7 +6,9 @@ import { useNavigate } from "react-router-dom";
  *   serviceName: string,
  *   myCalendars: Array,
  *   sharedCalendars: Array,
+ *   sharedEvents: Array,
  *   onToggleCalendar: (id: string) => void,
+ *   onToggleSharedEvent: (id: string) => void,
  *   onAddEvent: () => void,
  *   onAddCalendar: () => void,
  *   onEditCalendar: (calendar: object) => void,
@@ -18,7 +20,9 @@ export default function Sidebar({
     serviceName,
     myCalendars,
     sharedCalendars,
+    sharedEvents = [],
     onToggleCalendar,
+    onToggleSharedEvent,
     onAddEvent,
     onAddCalendar,
     onEditCalendar,
@@ -27,6 +31,7 @@ export default function Sidebar({
 }) {
     const navigate = useNavigate();
     const [areCalendarsOpen, setAreCalendarsOpen] = useState(true);
+    const [areSharedEventsOpen, setAreSharedEventsOpen] = useState(true);
 
     const handleBrandClick = () => {
         navigate('/');
@@ -157,6 +162,50 @@ export default function Sidebar({
                     )}
                 </div>
             </div>
+
+            {/* Блок "Shared events" */}
+            {sharedEvents.length > 0 && (
+                <div className="sidebar__section">
+                    <div className="sidebar__subsection">
+                        <button
+                            className="sidebar__subsection-header"
+                            onClick={() => setAreSharedEventsOpen((v) => !v)}
+                        >
+                            <span className="sidebar__subsection-title">
+                                shared events
+                            </span>
+                            <span className="sidebar__chevron">
+                                {areSharedEventsOpen ? "▾" : "▸"}
+                            </span>
+                        </button>
+
+                        {areSharedEventsOpen && (
+                            <ul className="sidebar__list">
+                                {sharedEvents.map((ev) => {
+                                    const eventId = String(ev.id || ev._id);
+                                    const eventTitle = ev.title || ev.name || "Shared event";
+                                    const eventColor = ev.color || ev.event?.color || "#EDE986";
+                                    return (
+                                        <li key={eventId} className="sidebar__item">
+                                            <label 
+                                                className="sidebar__checkbox-row"
+                                                style={{ "--calendar-color": eventColor }}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={ev.isVisible}
+                                                    onChange={() => onToggleSharedEvent(eventId)}
+                                                />
+                                                <span>{eventTitle}</span>
+                                            </label>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Кнопки в самому низу */}
             <div className="sidebar__footer">

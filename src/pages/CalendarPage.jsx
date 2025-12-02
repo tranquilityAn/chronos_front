@@ -17,6 +17,7 @@ import {
     toggleCalendar,
 } from "../features/calendars/calendarsSlice";
 import { loadEventsForRange } from "../features/events/eventsSlice";
+import { loadSharedEvents, toggleSharedEventVisibility } from "../features/sharedEvents/sharedEventsSlice";
 import { logout, updateUser } from "../features/auth/authSlice";
 import { getCurrentUser } from "../features/user/userApi";
 import { createCalendar, updateCalendar, deleteCalendar } from "../features/calendars/calendarApi";
@@ -64,6 +65,7 @@ export default function CalendarPage() {
     const { items: calendars, selectedIds, status: calStatus } = useSelector((s) => s.calendars);
     const { byDate: eventsByDate, status: evStatus } = useSelector((s) => s.events);
     const filters = useSelector((s) => s.events.filters);
+    const { items: sharedEventsItems, selectedIds: selectedSharedIds, status: sharedStatus } = useSelector((s) => s.sharedEvents);
 
     const [activeDate, setActiveDate] = useState(new Date());
     const [visibleRange, setVisibleRange] = useState(null);
@@ -119,10 +121,11 @@ export default function CalendarPage() {
         events: [],
     });
 
-    // Загрузка календарей при монтировании (если авторизован)
+    // Загрузка календарей и shared events при монтировании (если авторизован)
     useEffect(() => {
         if (token) {
             dispatch(loadCalendars());
+            dispatch(loadSharedEvents());
         }
     }, [dispatch, token]);
 
@@ -138,7 +141,7 @@ export default function CalendarPage() {
                 types: filters.types,
             })
         );
-    }, [dispatch, visibleRange, selectedIds, filters.types]);
+    }, [dispatch, visibleRange, selectedIds, filters.types, selectedSharedIds]);
 
     // Подготовка календарей для UI
     const uiCalendars = useMemo(
@@ -152,6 +155,19 @@ export default function CalendarPage() {
 
     const myCalendars = uiCalendars.filter((c) => c.role === "owner");
     const sharedCalendars = uiCalendars.filter((c) => c.role !== "owner");
+
+    // Подготовка shared events для UI
+    const visibleSharedEvents = useMemo(
+        () =>
+            sharedEventsItems.map((e) => {
+                const eventId = String(e.id || e._id);
+                return {
+                    ...e,
+                    isVisible: selectedSharedIds.includes(eventId),
+                };
+            }),
+        [sharedEventsItems, selectedSharedIds]
+    );
 
     // Handlers
     const handleLogout = () => {
@@ -335,7 +351,9 @@ export default function CalendarPage() {
                 serviceName="Houdini"
                 myCalendars={myCalendars}
                 sharedCalendars={sharedCalendars}
+                sharedEvents={visibleSharedEvents}
                 onToggleCalendar={(id) => dispatch(toggleCalendar(id))}
+                onToggleSharedEvent={(id) => dispatch(toggleSharedEventVisibility(id))}
                 onAddEvent={() => setIsEventModalOpen(true)}
                 onAddCalendar={() => setIsCalendarModalOpen(true)}
                 onEditCalendar={handleEditCalendar}
