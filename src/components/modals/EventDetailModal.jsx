@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Modal from "../ui/Modal";
 import Toast, { useToast } from "../ui/Toast";
 import { shareEvent, fetchEventMembers, removeEventMember } from "../../features/events/eventApi";
 import { getUserById } from "../../features/user/userApi";
+import { removeSharedEventById } from "../../features/sharedEvents/sharedEventsSlice";
+import { removeSharedEventFromCalendar } from "../../features/events/eventsSlice";
 
 /**
  * Форматирует дату/время для отображения
@@ -98,6 +100,7 @@ export default function EventDetailModal({
 
     // Get current user for shared event detection
     const currentUser = useSelector((s) => s.auth.user);
+    const dispatch = useDispatch();
 
     // State and cache for owner user data
     const [ownerUser, setOwnerUser] = useState(null);
@@ -413,7 +416,17 @@ export default function EventDetailModal({
                 return String(mid) !== String(userId);
             }));
 
-            showToast("You left the event successfully", "success");
+            // Удаляем из sharedEventsSlice
+            if (event.sharedItemId) {
+                dispatch(removeSharedEventById(event.sharedItemId));
+            }
+            
+            // Удаляем из eventsSlice.byDate
+            if (event.sharedItemId) {
+                dispatch(removeSharedEventFromCalendar(event.sharedItemId));
+            }
+
+            showToast("You have left the event", "success");
 
             // Закрываем модалку после выхода
             if (typeof onClose === "function") {
@@ -681,9 +694,7 @@ export default function EventDetailModal({
                                             userId &&
                                             String(userId) === String(currentUserId);
 
-                                        // Вычисляем role для каждого участника на основе event.createdBy
-                                        const isOwnerMember = userId && eventOwnerId && String(userId) === String(eventOwnerId);
-                                        const memberRole = isOwnerMember ? "owner" : "member";
+                                        const isOwner = userId && eventOwnerId && String(userId) === String(eventOwnerId);
 
                                         return (
                                             <li key={userId} className="event-members__item">
@@ -698,17 +709,16 @@ export default function EventDetailModal({
                                                         </div>
                                                     )}
                                                     <div className="event-members__role">
-                                                        {isOwnerMember ? "Owner" : "Member"}
+                                                        {isOwner ? "Owner" : "Member"}
                                                     </div>
                                                 </div>
 
                                                 <div className="event-members__actions">
-                                                    {/* Владелец ивента может удалить других участников, но не себя */}
+                                                    {/* Владелец ивента может удалить других участников */}
                                                     {iAmEventOwner && !isMe && (
                                                         <button
                                                             type="button"
-                                                            className="modal-form__btn modal-form__btn--danger"
-                                                            style={{ padding: "6px 12px", fontSize: "0.9em" }}
+                                                            className="event-members__btn event-members__btn--remove"
                                                             disabled={memberActionLoadingId === userId}
                                                             onClick={() => handleRemoveMember(member)}
                                                         >

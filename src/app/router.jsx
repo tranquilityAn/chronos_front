@@ -7,12 +7,14 @@ import ProfilePage from "../pages/ProfilePage.jsx";
 import CalendarInvitePage from "../pages/CalendarInvitePage.jsx";
 import EventInvitePage from "../pages/EventInvitePage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
+import VerifyEmailPage from "../pages/auth/VerifyEmailPage.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Calendar /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/profile", element: <ProfilePage /> },
+  { path: "/verify-email", element: <VerifyEmailPage /> },
   { path: "/calendar-invite/accept", element: <CalendarInvitePage /> },
   { path: "/calendar-invite/decline", element: <CalendarInvitePage /> },
   { path: "/event-invite/accept", element: <EventInvitePage /> },

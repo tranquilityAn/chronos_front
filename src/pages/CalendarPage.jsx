@@ -16,7 +16,7 @@ import {
     loadCalendars,
     toggleCalendar,
 } from "../features/calendars/calendarsSlice";
-import { loadEventsForRange } from "../features/events/eventsSlice";
+import { loadEventsForRange, clearEvents } from "../features/events/eventsSlice";
 import { loadSharedEvents, toggleSharedEventVisibility } from "../features/sharedEvents/sharedEventsSlice";
 import { logout, updateUser } from "../features/auth/authSlice";
 import { getCurrentUser } from "../features/user/userApi";
@@ -131,7 +131,15 @@ export default function CalendarPage() {
 
     // Загрузка событий при изменении диапазона
     useEffect(() => {
-        if (!visibleRange || !selectedIds.length) return;
+        // Если диапазон ещё не известен — нечего загружать
+        if (!visibleRange) return;
+
+        // Если пользователь отключил все календари — очищаем события,
+        // чтобы в сетке не оставались старые данные
+        if (!selectedIds.length) {
+            dispatch(clearEvents());
+            return;
+        }
         
         dispatch(
             loadEventsForRange({

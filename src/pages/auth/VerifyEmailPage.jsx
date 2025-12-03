@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { verifyEmailRequest } from "../../features/auth/authApi";
 import styles from "../../styles/Auth.module.css";
@@ -8,51 +8,55 @@ export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("loading"); // loading, success, error
   const [message, setMessage] = useState("");
+  const calledRef = useRef(false);
+
+  // Извлекаем токен один раз через useMemo для стабильности зависимостей
+  const token = useMemo(() => {
+    const t = searchParams.get("token")?.trim();
+    return t || null;
+  }, [searchParams]);
 
   useEffect(() => {
-    // Получаем токен из URL параметра (useSearchParams автоматически декодирует)
-    let token = searchParams.get("token");
-
-    // Дополнительная проверка и нормализация токена
-    if (!token) {
-      setStatus("error");
-      setMessage("Verification token is missing");
+    // Защита от повторного вызова (включая StrictMode двойной mount)
+    if (!token || calledRef.current) {
+      if (!token) {
+        setStatus("error");
+        setMessage("Verification token is missing");
+      }
       return;
     }
 
-    // Убеждаемся, что токен не пустой после trim
-    token = token.trim();
-    if (!token) {
-      setStatus("error");
-      setMessage("Verification token is invalid");
-      return;
-    }
+    // Устанавливаем флаг перед вызовом, чтобы предотвратить повторный запрос
+    calledRef.current = true;
 
-    // Логирование для отладки (можно убрать в production)
-    console.log("Verification token received, length:", token.length);
-
-    const verifyEmail = async () => {
+    const verify = async () => {
       try {
         await verifyEmailRequest(token);
         setStatus("success");
-        setMessage("Email verified successfully");
-        // Редирект на логин через 2 секунды
+        setMessage("Your email has been successfully verified!");
+
         setTimeout(() => {
           navigate("/login?verified=success");
         }, 2000);
       } catch (err) {
         setStatus("error");
-        const errorMessage = err?.response?.data?.message ||
+
+        const backendMessage =
+          err?.response?.data?.message ||
           err?.response?.data?.error ||
-          err?.message ||
-          "Email verification failed";
-        setMessage(errorMessage);
+          err?.message;
+
+        setMessage(
+          backendMessage ||
+            "Email verification failed. The verification link is invalid or has expired."
+        );
+
         console.error("Email verification error:", err);
       }
     };
 
-    verifyEmail();
-  }, [searchParams, navigate]);
+    verify();
+  }, [token, navigate]);
 
   return (
     <div className={styles.page}>
@@ -77,7 +81,7 @@ export default function VerifyEmailPage() {
 
             {status === "success" && (
               <div style={{ textAlign: "center", padding: "20px" }}>
-                <p style={{ color: "var(--success-color, #4caf50)" }}>
+                <p style={{ color: "var(--success-color, #7AC74F)" }}>
                   {message}
                 </p>
                 <p
@@ -87,15 +91,7 @@ export default function VerifyEmailPage() {
                     marginTop: "10px",
                   }}
                 >
-                  Redirecting to login page...
-                </p>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div style={{ textAlign: "center", padding: "20px" }}>
-                <p style={{ color: "var(--error-color, crimson)" }}>
-                  {message}
+                  You can now log in to your account.
                 </p>
                 <button
                   className={styles.buttonX}
@@ -104,6 +100,33 @@ export default function VerifyEmailPage() {
                 >
                   Go to Login
                 </button>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                <p style={{ color: "var(--error-color, #E86A5D)" }}>
+                  {message ||
+                    "Email verification failed. The verification link is invalid or has expired."}
+                </p>
+                <div style={{ marginTop: "20px" }}>
+                  <button
+                    className={styles.buttonX}
+                    onClick={() => navigate("/login")}
+                  >
+                    Go to Login
+                  </button>
+                  <div style={{ marginTop: "12px" }}>
+                    <button
+                      className={styles.linkX}
+                      type="button"
+                      onClick={() => navigate("/register")}
+                      style={{ background: "none", border: "none" }}
+                    >
+                      Go to Registration
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

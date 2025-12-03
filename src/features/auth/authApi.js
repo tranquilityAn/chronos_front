@@ -32,3 +32,18 @@ export const registerRequest = async ({ email, password }) => {
   
   return data; // ожидается { user, token }/message — зависит от бэка
 };
+
+// GET /auth/verify-email?token=...
+export const verifyEmailRequest = async (token) => {
+  const normalizedToken = String(token || '').trim();
+
+  if (!normalizedToken) {
+    throw new Error('Verification token is required');
+  }
+
+  const { data } = await api.get('api/auth/verify-email', {
+    params: { token: normalizedToken },
+  });
+
+  return data; // ожидается { message: "Email verified successfully" }
+};

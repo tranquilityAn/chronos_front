@@ -69,6 +69,29 @@ const slice = createSlice({
         setTypesFilter(state, action) {
             state.filters.types = action.payload ?? [];
         },
+        /**
+         * Полностью очищает события (например, когда пользователь отключил все календари)
+         */
+        clearEvents(state) {
+            state.byDate = {};
+            state.status = "idle";
+        },
+        /**
+         * Удаляет shared event из календаря по sharedItemId
+         * Проходит по всем датам в byDate и удаляет события с matching sharedItemId
+         */
+        removeSharedEventFromCalendar(state, action) {
+            const sharedItemId = String(action.payload);
+            // Проходим по всем датам и удаляем события с matching sharedItemId
+            Object.keys(state.byDate).forEach(dateKey => {
+                state.byDate[dateKey] = state.byDate[dateKey].filter(ev => {
+                    if (ev.isShared && ev.sharedItemId) {
+                        return String(ev.sharedItemId) !== sharedItemId;
+                    }
+                    return true;
+                });
+            });
+        },
     },
     extraReducers: (b) => {
         b.addCase(loadEventsForRange.pending, (s) => {
@@ -120,7 +143,7 @@ const slice = createSlice({
     },
 });
 
-export const { setTypesFilter } = slice.actions;
+export const { setTypesFilter, clearEvents, removeSharedEventFromCalendar } = slice.actions;
 export default slice.reducer;
 
 import { eachDayOfInterval } from "date-fns";
