@@ -1,6 +1,5 @@
 @import url('../../styles/global.css');
 
-/* Модальное окно подтверждения удаления календаря */
 .calendar-delete-modal-backdrop {
     position: fixed;
     top: 0;
@@ -86,7 +85,6 @@
     cursor: not-allowed;
 }
 
-/* Модальное окно подтверждения удаления участника */
 .calendar-remove-modal-backdrop {
     position: fixed;
     top: 0;
@@ -172,7 +170,6 @@
     cursor: not-allowed;
 }
 
-/* Стили для мета-информации (createdAt/updatedAt) */
 .modal-form__meta-value {
     font-size: 14px;
     color: var(--main-text-color);
@@ -180,7 +177,6 @@
     opacity: 0.6;
 }
 
-/* Стили для отображения цвета для viewer */
 .modal-form__color-display {
     display: flex;
     align-items: center;
@@ -202,12 +198,10 @@
     color: var(--main-text-color);
 }
 
-/* Увеличенные отступы для блока Color */
 .modal-form__group--color {
     margin-top: 16px;
 }
 
-/* Увеличенный верхний отступ для блока мета-информации */
 .modal-form__group--meta {
     margin-top: 16px;
 }

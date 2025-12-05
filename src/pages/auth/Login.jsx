@@ -1,4 +1,3 @@
-// src/pages/auth/Login.jsx
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -19,16 +18,13 @@ export default function Login() {
     try {
       await dispatch(login({ email, password })).unwrap();
       
-      // Проверяем наличие redirect параметра
       const redirectUrl = searchParams.get("redirect");
       if (redirectUrl) {
-        // Декодируем и перенаправляем на сохраненный URL
         navigate(decodeURIComponent(redirectUrl), { replace: true });
       } else {
         navigate("/", { replace: true });
       }
     } catch (err) {
-      // Ошибка обрабатывается через Redux state
     }
   };
 

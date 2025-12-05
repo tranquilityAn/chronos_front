@@ -14,28 +14,16 @@ import { loadCalendars } from "../../features/calendars/calendarsSlice";
 import "./EditCalendarModal.css";
 
 const COLORS = [
-    "#EDE986", // yellow (accent)
-    "#7AC74F", // green
-    "#5DADE2", // blue
-    "#AF7AC5", // purple
-    "#E86A5D", // red
-    "#F5B041", // orange
-    "#58D68D", // mint
-    "#85C1E9", // light blue
+    "#EDE986",
+    "#7AC74F",
+    "#5DADE2",
+    "#AF7AC5",
+    "#E86A5D",
+    "#F5B041",
+    "#58D68D",
+    "#85C1E9",
 ];
 
-/**
- * Модальное окно редактирования календаря с функционалом шаринга
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   onSubmit: (calendarId: string, data: { name: string, description?: string, color?: string }) => Promise<void>,
- *   onDelete: (calendarId: string) => Promise<void>,
- *   calendar: { id: string, name: string, description?: string, color?: string, role: "owner" | "editor" | "viewer", createdAt?: string, updatedAt?: string } | null,
- *   isLoading?: boolean,
- *   isDeleting?: boolean
- * }} props
- */
 export default function EditCalendarModal({ 
     isOpen, 
     onClose, 
@@ -60,32 +48,26 @@ export default function EditCalendarModal({
     const [error, setError] = useState("");
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     
-    // Sharing state
     const [showShareForm, setShowShareForm] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("viewer");
     const [isInviting, setIsInviting] = useState(false);
     const [inviteError, setInviteError] = useState("");
     
-    // Member management state
     const [removingMemberId, setRemovingMemberId] = useState(null);
     const [updatingMemberId, setUpdatingMemberId] = useState(null);
     
-    // Remove member confirmation modal state
     const [memberToRemove, setMemberToRemove] = useState(null);
     const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
     const [isRemovingMember, setIsRemovingMember] = useState(false);
     
-    // Leave calendar confirmation modal state
     const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
     const [isLeavingCalendar, setIsLeavingCalendar] = useState(false);
 
-    // Определение роли на основе calendar.role
     const isOwner = calendarProp?.role === "owner";
     const isEditor = calendarProp?.role === "editor";
     const isViewer = calendarProp?.role === "viewer";
 
-    // Инициализация calendar и formData при изменении calendarProp
     useEffect(() => {
         if (calendarProp && isOpen) {
             setCalendar(calendarProp);
@@ -126,7 +108,6 @@ export default function EditCalendarModal({
         e.preventDefault();
         setError("");
 
-        // Валидация
         if (!formData.name.trim()) {
             setError("Calendar name is required");
             return;
@@ -175,7 +156,6 @@ export default function EditCalendarModal({
             handleClose();
         } catch (err) {
             setError(err?.response?.data?.message || err.message || "Failed to delete calendar");
-            // Don't close modal on error, let user see the error and try again or cancel
         }
     };
 
@@ -185,10 +165,9 @@ export default function EditCalendarModal({
 
     const handleInvite = async (e) => {
         e.preventDefault();
-        e.stopPropagation(); // Предотвращаем всплытие события к родительской форме
+        e.stopPropagation();
         setInviteError("");
 
-        // Валидация email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!inviteEmail.trim()) {
             setInviteError("Email is required");
@@ -213,7 +192,6 @@ export default function EditCalendarModal({
             setInviteEmail("");
             setInviteRole("viewer");
             setShowShareForm(false);
-            // Перезагружаем список участников
             await loadMembers();
         } catch (err) {
             console.error("Invite error:", err);
@@ -275,11 +253,9 @@ export default function EditCalendarModal({
         setIsLeavingCalendar(true);
         try {
             await removeCalendarMember(calendarProp.id, currentUser.id);
-            // Обновляем список календарей
             dispatch(loadCalendars());
             showToast("You left the calendar successfully", "success");
             setIsLeaveConfirmOpen(false);
-            // Закрываем модалку
             handleClose();
         } catch (err) {
             const errorMessage = err?.response?.data?.error ||
@@ -350,11 +326,9 @@ export default function EditCalendarModal({
         <Modal isOpen={isOpen} onClose={handleClose} title="Edit Calendar">
             <div className="modal-form">
                 <form onSubmit={handleSubmit}>
-                    {/* Информация о календаре */}
                     <div className="modal-form__section">
                         <h3 className="modal-form__section-title">Calendar Information</h3>
                         
-                        {/* Название */}
                         <div className="modal-form__group">
                             <label className="modal-form__label">
                                 Name <span className="modal-form__required">*</span>
@@ -373,7 +347,6 @@ export default function EditCalendarModal({
                             />
                         </div>
 
-                        {/* Описание */}
                         <div className="modal-form__group">
                             <label className="modal-form__label">Description</label>
                             <textarea
@@ -389,7 +362,6 @@ export default function EditCalendarModal({
                             />
                         </div>
 
-                        {/* Цвет */}
                         <div className="modal-form__group modal-form__group--color">
                             <label className="modal-form__label">Color</label>
                             {isViewer ? (
@@ -437,7 +409,6 @@ export default function EditCalendarModal({
                             )}
                         </div>
 
-                        {/* Даты создания и обновления (как текст) */}
                         {calendar && (calendar.createdAt || calendar.updatedAt) && (
                             <div className="modal-form__group modal-form__group--meta">
                                 {calendar.createdAt && (
@@ -460,10 +431,8 @@ export default function EditCalendarModal({
                         )}
                     </div>
 
-                    {/* Ошибка */}
                     {error && <div className="modal-form__error">{error}</div>}
 
-                    {/* Кнопки */}
                     <div className="modal-form__actions">
                         {isOwner && (
                             <button
@@ -488,7 +457,6 @@ export default function EditCalendarModal({
                     </div>
                 </form>
 
-                {/* Секция шаринга - вынесена из основной формы */}
                 {isOwner && !isLoadingMembers && (
                     <div className="modal-form__section">
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -555,7 +523,6 @@ export default function EditCalendarModal({
                     </div>
                 )}
 
-                {/* Список участников */}
                 <div className="modal-form__section">
                     <h3 className="modal-form__section-title">Members</h3>
                     
@@ -644,7 +611,6 @@ export default function EditCalendarModal({
             </div>
         </Modal>
 
-        {/* Модальное окно подтверждения удаления календаря */}
         {isDeleteConfirmOpen && (
             <div className="calendar-delete-modal-backdrop">
                 <div className="calendar-delete-modal">
@@ -672,7 +638,6 @@ export default function EditCalendarModal({
             </div>
         )}
 
-        {/* Модальное окно подтверждения удаления участника */}
         {isRemoveConfirmOpen && (
             <div className="calendar-remove-modal-backdrop">
                 <div className="calendar-remove-modal">
@@ -702,7 +667,6 @@ export default function EditCalendarModal({
             </div>
         )}
 
-        {/* Модальное окно подтверждения выхода из календаря */}
         {isLeaveConfirmOpen && (
             <div className="calendar-remove-modal-backdrop">
                 <div className="calendar-remove-modal">
@@ -730,7 +694,6 @@ export default function EditCalendarModal({
             </div>
         )}
 
-        {/* Toast уведомления */}
         <Toast
             message={toast.message}
             type={toast.type}

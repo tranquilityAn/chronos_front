@@ -1,6 +1,5 @@
 @import url("../styles/global.css");
 
-/* === ОБОЛОЧКА === */
 .notfound-page {
   min-height: 100vh;
   display: flex;
@@ -11,7 +10,6 @@
   padding: 0;
 }
 
-/* === ХЕДЕР === */
 .notfound-header {
   background-color: #1b1b1b;
   display: flex;
@@ -27,7 +25,6 @@
   margin-left: 20px;
 }
 
-/* === ОСНОВНАЯ ЧАСТЬ === */
 .notfound-main {
   display: flex;
   height: 93vh;
@@ -46,7 +43,6 @@
   padding: 20px;
 }
 
-/* === ИЗОБРАЖЕНИЕ === */
 .notfound-image {
   max-width: 280px;
   width: 100%;
@@ -59,21 +55,18 @@
   opacity: 0.8;
 }
 
-/* === ЗАГОЛОВОК === */
 .notfound-title {
   font-size: 30px;
   color: var(--main-text-color);
   margin: 0;
 }
 
-/* === ТЕКСТ === */
 .notfound-text {
   color: var(--second-text-color);
   font-size: 16px;
   margin: 0;
 }
 
-/* === ССЫЛКА === */
 .notfound-link {
   display: inline-block;
   padding: 12px 24px;
@@ -92,12 +85,10 @@
   box-shadow: 0 0 9px var(--second-color);
 }
 
-/* === АУДИО === */
 .notfound-audio {
   display: none;
 }
 
-/* === АДАПТИВ === */
 @media (max-width: 767px) {
   .notfound-image {
     max-width: 280px;

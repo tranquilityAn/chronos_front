@@ -18,7 +18,6 @@ function saveSelectedCalendarIds(ids) {
     try {
         localStorage.setItem(CALENDAR_SELECTED_KEY, JSON.stringify(ids || []));
     } catch {
-        // можно игнорировать
     }
 }
 
@@ -58,10 +57,8 @@ const slice = createSlice({
             const allIds = a.payload.map((c) => c.id);
 
             if (s.selectedIds && s.selectedIds.length) {
-                // оставляем только те, которые реально есть
                 s.selectedIds = s.selectedIds.filter((id) => allIds.includes(id));
             } else {
-                // первый запуск, локалки нет — включаем все
                 s.selectedIds = allIds;
             }
 

@@ -7,9 +7,6 @@ import { getUserById } from "../../features/user/userApi";
 import { removeSharedEventById } from "../../features/sharedEvents/sharedEventsSlice";
 import { removeSharedEventFromCalendar } from "../../features/events/eventsSlice";
 
-/**
- * Форматирует дату/время для отображения
- */
 function formatDateTime(dateString, options = {}) {
     if (!dateString) return "—";
     const date = new Date(dateString);
@@ -20,9 +17,6 @@ function formatDateTime(dateString, options = {}) {
     });
 }
 
-/**
- * Форматирует только дату
- */
 function formatDate(dateString) {
     if (!dateString) return "—";
     const date = new Date(dateString);
@@ -34,9 +28,6 @@ function formatDate(dateString) {
     });
 }
 
-/**
- * Возвращает название типа события для отображения
- */
 function getEventTypeLabel(type) {
     switch (type) {
         case "arrangement":
@@ -51,28 +42,16 @@ function getEventTypeLabel(type) {
 }
 
 const COLORS = [
-    "#EDE986", // yellow (accent)
-    "#7AC74F", // green
-    "#5DADE2", // blue
-    "#AF7AC5", // purple
-    "#E86A5D", // red
-    "#F5B041", // orange
-    "#58D68D", // mint
-    "#85C1E9", // light blue
+    "#EDE986",
+    "#7AC74F",
+    "#5DADE2",
+    "#AF7AC5",
+    "#E86A5D",
+    "#F5B041",
+    "#58D68D",
+    "#85C1E9",
 ];
 
-/**
- * Модальное окно с деталями события
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   event: object | null,
- *   onDelete: (calendarId: string, eventId: string) => Promise<void>,
- *   onUpdate: (calendarId: string, eventId: string, data: object) => Promise<void>,
- *   isDeleting?: boolean,
- *   isUpdating?: boolean
- * }} props
- */
 export default function EventDetailModal({
     isOpen,
     onClose,
@@ -91,28 +70,23 @@ export default function EventDetailModal({
     });
     const [error, setError] = useState("");
     
-    // Share functionality state
     const { toast, showToast, hideToast } = useToast();
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [shareEmail, setShareEmail] = useState("");
     const [isSharing, setIsSharing] = useState(false);
     const [shareError, setShareError] = useState(null);
 
-    // Get current user for shared event detection
     const currentUser = useSelector((s) => s.auth.user);
     const dispatch = useDispatch();
 
-    // State and cache for owner user data
     const [ownerUser, setOwnerUser] = useState(null);
     const ownerCacheRef = useRef({});
 
-    // Event members state
     const [eventMembers, setEventMembers] = useState([]);
     const [membersLoading, setMembersLoading] = useState(false);
     const [membersError, setMembersError] = useState(null);
     const [memberActionLoadingId, setMemberActionLoadingId] = useState(null);
 
-    // Сброс состояния при открытии/закрытии
     useEffect(() => {
         if (event) {
             setEditData({
@@ -124,29 +98,23 @@ export default function EventDetailModal({
         setIsEditing(false);
         setShowDeleteConfirm(false);
         setError("");
-        // Reset share state
         setIsShareOpen(false);
         setShareEmail("");
         setShareError(null);
-        // Reset owner user state
         const sharedOwnerFromEvent = event?.sharedOwner || null;
         setOwnerUser(sharedOwnerFromEvent || null);
-        // Reset event members state
         setEventMembers([]);
         setMembersLoading(false);
         setMembersError(null);
         setMemberActionLoadingId(null);
     }, [event, isOpen]);
 
-    // Determine if event is shared and if current user is recipient (not owner)
-    // Вычисляем переменные после всех хуков, но до раннего return
     const isShared = event?.isShared === true || !!event?.sharedItemId;
     const sharedOwnerFromEvent = event?.sharedOwner || null;
     const sharedOwnerId = event?.sharedOwnerId || 
                          (event?.createdBy ? String(event.createdBy) : null) ||
                          null;
 
-    // Определяем, является ли текущий пользователь владельцем
     const currentUserId = currentUser?.id || currentUser?._id || null;
     const isOwner = !!currentUserId && 
                     !!sharedOwnerId && 
@@ -154,27 +122,22 @@ export default function EventDetailModal({
 
     const isSharedRecipient = isShared && !isOwner;
 
-    // Extract calendarId and eventId for API calls
     const calendarId = event?.calendarId || event?.calendar?.id || event?.calendar?._id || null;
     const eventId = event?.id || event?._id || null;
     const eventOwnerId = event?.createdBy ? String(event.createdBy) : null;
 
-    // Load owner data for shared events
     useEffect(() => {
         let isCancelled = false;
 
         const loadOwner = async () => {
-            // Нужен только если это shared event и мы не владелец
             if (!isSharedRecipient) return;
             if (!sharedOwnerId) return;
 
-            // Если данные уже есть в event, используем их
             if (sharedOwnerFromEvent && !ownerUser) {
                 setOwnerUser(sharedOwnerFromEvent);
                 return;
             }
 
-            // Проверим кэш внутри компонента
             if (ownerCacheRef.current[sharedOwnerId]) {
                 setOwnerUser(ownerCacheRef.current[sharedOwnerId]);
                 return;
@@ -198,11 +161,10 @@ export default function EventDetailModal({
         };
     }, [isSharedRecipient, sharedOwnerId, sharedOwnerFromEvent, ownerUser]);
 
-    // Load event members for shared events
     useEffect(() => {
         if (!isOpen) return;
         if (!calendarId || !eventId) return;
-        if (!isShared) return; // Only load for shared events
+        if (!isShared) return;
 
         let cancelled = false;
 
@@ -233,7 +195,6 @@ export default function EventDetailModal({
         };
     }, [isOpen, calendarId, eventId, isShared]);
 
-    // Compute current member and event owner status
     const currentMember = eventMembers.find(
         (m) => currentUser && m.user && String(m.user.id || m.user._id) === String(currentUserId)
     );
@@ -241,7 +202,6 @@ export default function EventDetailModal({
                           !!eventOwnerId && 
                           String(currentUserId) === String(eventOwnerId);
 
-    // Early return after all hooks
     if (!event) return null;
 
     const handleDelete = async () => {
@@ -250,7 +210,6 @@ export default function EventDetailModal({
             setShowDeleteConfirm(false);
             onClose();
         } catch (err) {
-            // Ошибка обрабатывается в родительском компоненте
         }
     };
 
@@ -308,7 +267,6 @@ export default function EventDetailModal({
         try {
             await onUpdate(event.calendarId, event.id, { isDone: !event.isDone });
         } catch (err) {
-            // Ошибка обрабатывается в родительском компоненте
         }
     };
 
@@ -377,7 +335,6 @@ export default function EventDetailModal({
             setMemberActionLoadingId(userId);
             await removeEventMember({ calendarId, eventId, userId });
 
-            // Локально обновляем список участников
             setEventMembers((prev) => prev.filter((m) => {
                 const mid = m.user.id || m.user._id;
                 return String(mid) !== String(userId);
@@ -410,25 +367,21 @@ export default function EventDetailModal({
             setMemberActionLoadingId(userId);
             await removeEventMember({ calendarId, eventId, userId });
 
-            // Локально обновляем список участников
             setEventMembers((prev) => prev.filter((m) => {
                 const mid = m.user.id || m.user._id;
                 return String(mid) !== String(userId);
             }));
 
-            // Удаляем из sharedEventsSlice
             if (event.sharedItemId) {
                 dispatch(removeSharedEventById(event.sharedItemId));
             }
             
-            // Удаляем из eventsSlice.byDate
             if (event.sharedItemId) {
                 dispatch(removeSharedEventFromCalendar(event.sharedItemId));
             }
 
             showToast("You have left the event", "success");
 
-            // Закрываем модалку после выхода
             if (typeof onClose === "function") {
                 onClose();
             }
@@ -449,17 +402,14 @@ export default function EventDetailModal({
         <>
         <Modal isOpen={isOpen} onClose={handleClose} title={null} closePosition="right">
             <div className="event-detail">
-                {/* Заголовок с типом */}
                 <div className="event-detail__header">
                     <span className="event-detail__type-label">
                         {getEventTypeLabel(event.type)}
                     </span>
                 </div>
 
-                {/* Режим редактирования */}
                 {isEditing ? (
                     <div className="event-detail__edit-form">
-                        {/* Название */}
                         <div className="event-detail__edit-group">
                             <label className="event-detail__edit-label">Title</label>
                             <input
@@ -473,7 +423,6 @@ export default function EventDetailModal({
                             />
                         </div>
 
-                        {/* Описание */}
                         <div className="event-detail__edit-group">
                             <label className="event-detail__edit-label">Description</label>
                             <textarea
@@ -487,7 +436,6 @@ export default function EventDetailModal({
                             />
                         </div>
 
-                        {/* Цвет */}
                         <div className="event-detail__edit-group">
                             <label className="event-detail__edit-label">Color</label>
                             <div className="event-detail__colors">
@@ -515,10 +463,8 @@ export default function EventDetailModal({
                             </div>
                         </div>
 
-                        {/* Ошибка */}
                         {error && <div className="event-detail__error">{error}</div>}
 
-                        {/* Кнопки редактирования */}
                         <div className="event-detail__edit-actions">
                             <button
                                 type="button"
@@ -540,10 +486,8 @@ export default function EventDetailModal({
                     </div>
                 ) : (
                     <>
-                        {/* Название */}
                         <h2 className="event-detail__title">{event.title}</h2>
 
-                        {/* Цветовой индикатор */}
                         {event.color && (
                             <div
                                 className="event-detail__color-bar"
@@ -551,9 +495,7 @@ export default function EventDetailModal({
                             />
                         )}
 
-                        {/* Детали в зависимости от типа */}
                         <div className="event-detail__info">
-                            {/* Arrangement (Meeting) */}
                             {event.type === "arrangement" && (
                                 <>
                                     {event.allDay ? (
@@ -590,7 +532,6 @@ export default function EventDetailModal({
                                 </>
                             )}
 
-                            {/* Reminder */}
                             {event.type === "reminder" && (
                                 <div className="event-detail__row">
                                     <span className="event-detail__label">Remind at</span>
@@ -600,7 +541,6 @@ export default function EventDetailModal({
                                 </div>
                             )}
 
-                            {/* Task */}
                             {event.type === "task" && (
                                 <>
                                     <div className="event-detail__row">
@@ -628,7 +568,6 @@ export default function EventDetailModal({
                                 </>
                             )}
 
-                            {/* Описание */}
                             {event.description && (
                                 <div className="event-detail__row event-detail__row--column">
                                     <span className="event-detail__label">Description</span>
@@ -638,14 +577,12 @@ export default function EventDetailModal({
                                 </div>
                             )}
 
-                            {/* Дата создания */}
                             <div className="event-detail__row event-detail__row--meta">
                                 <span className="event-detail__meta">
                                     Created: {formatDate(event.createdAt)}
                                 </span>
                             </div>
 
-                            {/* Owner information for shared events */}
                             {isSharedRecipient && (() => {
                                 const ownerName = ownerUser?.name || 
                                                  ownerUser?.nickname || 
@@ -667,7 +604,6 @@ export default function EventDetailModal({
                             })()}
                         </div>
 
-                        {/* Event Members Section */}
                         {isShared && (membersLoading || membersError || (eventMembers && eventMembers.length > 0)) && (
                             <div className="event-members">
                                 <div className="event-members__header">
@@ -714,7 +650,6 @@ export default function EventDetailModal({
                                                 </div>
 
                                                 <div className="event-members__actions">
-                                                    {/* Владелец ивента может удалить других участников */}
                                                     {iAmEventOwner && !isMe && (
                                                         <button
                                                             type="button"
@@ -726,7 +661,6 @@ export default function EventDetailModal({
                                                         </button>
                                                     )}
 
-                                                    {/* Получатель (не-owner) может удалить только себя */}
                                                     {!iAmEventOwner && isMe && (
                                                         <button
                                                             type="button"
@@ -751,7 +685,6 @@ export default function EventDetailModal({
                             </div>
                         )}
 
-                        {/* Кнопки */}
                         {!isSharedRecipient && (
                             <div className="event-detail__actions">
                             {!showDeleteConfirm ? (
@@ -806,7 +739,6 @@ export default function EventDetailModal({
                             </div>
                         )}
 
-                        {/* Share form */}
                         {!isSharedRecipient && isShareOpen && (
                             <form
                                 className="event-detail__share"
@@ -846,7 +778,6 @@ export default function EventDetailModal({
             </div>
         </Modal>
         
-        {/* Toast notifications */}
         <Toast
             message={toast.message}
             type={toast.type}

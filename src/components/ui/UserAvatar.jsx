@@ -10,7 +10,6 @@ export default function UserAvatar({ onLogout }) {
     const [avatarError, setAvatarError] = useState(false);
     const menuRef = useRef(null);
 
-    // Закрытие меню при клике вне его
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -28,31 +27,25 @@ export default function UserAvatar({ onLogout }) {
     }, [isMenuOpen]);
 
     const getInitials = (name, email) => {
-        // Если есть имя, формируем инициалы из имени
         if (name && typeof name === 'string' && name.trim()) {
             const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
             if (parts.length >= 2) {
-                // Если несколько слов, берем первую букву первого и последнего слова
                 const first = parts[0][0] || '';
                 const last = parts[parts.length - 1][0] || '';
                 return (first + last).toUpperCase();
             }
             if (parts.length === 1 && parts[0].length >= 2) {
-                // Если одно слово, берем первые две буквы
                 return parts[0].substring(0, 2).toUpperCase();
             }
             if (parts.length === 1) {
-                // Если одно слово из одной буквы
                 return parts[0][0].toUpperCase();
             }
         }
         
-        // Если имени нет, формируем из email
         if (email && typeof email === 'string' && email.trim()) {
             const emailClean = email.trim();
             const atIndex = emailClean.indexOf('@');
             if (atIndex > 0) {
-                // Берем первые две буквы до символа @
                 const beforeAt = emailClean.substring(0, atIndex);
                 if (beforeAt.length >= 2) {
                     return beforeAt.substring(0, 2).toUpperCase();
@@ -65,7 +58,6 @@ export default function UserAvatar({ onLogout }) {
             return emailClean[0].toUpperCase();
         }
         
-        // Если ничего нет, возвращаем дефолтный символ
         return 'U';
     };
 
@@ -86,14 +78,12 @@ export default function UserAvatar({ onLogout }) {
         }
     };
 
-    // Проверяем наличие валидного аватара
     const hasAvatar = user?.avatar && 
                       typeof user.avatar === 'string' && 
                       user.avatar.trim() !== '' && 
                       user.avatar !== 'null' && 
                       user.avatar !== 'undefined';
 
-    // Сбрасываем ошибку при изменении аватара
     useEffect(() => {
         if (user?.avatar) {
             setAvatarError(false);
@@ -121,7 +111,6 @@ export default function UserAvatar({ onLogout }) {
                         alt={user.name || user.email}
                         className="user-avatar__image"
                         onError={() => {
-                            // Если изображение не загрузилось, показываем инициалы
                             setAvatarError(true);
                         }}
                     />

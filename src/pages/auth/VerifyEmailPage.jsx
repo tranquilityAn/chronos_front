@@ -6,18 +6,16 @@ import styles from "../../styles/Auth.module.css";
 export default function VerifyEmailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState("loading"); // loading, success, error
+  const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
   const calledRef = useRef(false);
 
-  // Извлекаем токен один раз через useMemo для стабильности зависимостей
   const token = useMemo(() => {
     const t = searchParams.get("token")?.trim();
     return t || null;
   }, [searchParams]);
 
   useEffect(() => {
-    // Защита от повторного вызова (включая StrictMode двойной mount)
     if (!token || calledRef.current) {
       if (!token) {
         setStatus("error");
@@ -26,7 +24,6 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    // Устанавливаем флаг перед вызовом, чтобы предотвратить повторный запрос
     calledRef.current = true;
 
     const verify = async () => {

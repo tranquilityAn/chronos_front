@@ -29,15 +29,11 @@ body {
   color: var(--main-text-color);
 }
 
-/* Глобальные стили скроллбаров */
-
-/* Firefox */
 html {
   scrollbar-width: thin;
   scrollbar-color: var(--second-color) rgba(0, 0, 0, 0.2);
 }
 
-/* WebKit (Chrome, Edge, Safari) */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;

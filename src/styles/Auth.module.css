@@ -1,6 +1,5 @@
 @import url("./global.css");
 
-/* === ОБОЛОЧКА === */
 .page {
   height: 100vh;
   width: auto;
@@ -12,7 +11,6 @@
   padding: 0;
 }
 
-/* === ХЕДЕР === */
 .header {
   background-color: #1b1b1b;
   display: flex;
@@ -29,14 +27,12 @@
   margin-left: 20px;
 }
 
-/* === ОСНОВНАЯ ЧАСТЬ === */
 .main {
   display: flex;
   height: 93vh;
   width: 100%;
 }
 
-/* === КАРТИНКА === */
 .image {
   opacity: 0.5;
   background-image: linear-gradient(
@@ -51,7 +47,7 @@
       rgba(0, 0, 0, 0.1) 80%,
       rgba(0, 0, 0, 0.6) 100%
     ),
-    url("/skull.jpg"); /* кладёшь skull.jpg в public/ */
+    url("/skull.jpg");
   flex: 1;
   background-size: cover;
   background-position: center;
@@ -59,7 +55,6 @@
   overflow: hidden;
 }
 
-/* === КОЛОНКА С ФОРМОЙ === */
 .panel {
   background-color: var(--main-color);
   height: 100%;
@@ -78,14 +73,12 @@
   padding-left: 20%;
 }
 
-/* === ЗАГОЛОВОК === */
 .title {
   font-size: 30px;
   align-self: start;
   color: var(--main-text-color);
 }
 
-/* === ФОРМА === */
 .form {
   flex: 1;
   display: flex;
@@ -115,7 +108,6 @@
   font-weight: normal;
 }
 
-/* === ИНПУТЫ === */
 .inputX {
   padding-left: 3%;
   max-width: 350px;
@@ -131,7 +123,6 @@
   opacity: 0.5;
 }
 
-/* === КНОПКИ === */
 .buttonX {
   box-shadow: 0 0 0 0 var(--second-color);
   max-width: 350px;
@@ -151,7 +142,6 @@
   box-shadow: 0 0 9px var(--second-color);
 }
 
-/* === ССЫЛКИ === */
 .linkX {
   color: var(--second-color);
   text-decoration: none;
@@ -163,7 +153,6 @@
   cursor: pointer;
 }
 
-/* === АДАПТИВ === */
 @media (max-width: 767px) {
   .main {
     flex-direction: column;

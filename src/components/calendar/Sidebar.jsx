@@ -1,21 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-/**
- * @param {{
- *   serviceName: string,
- *   myCalendars: Array,
- *   sharedCalendars: Array,
- *   sharedEvents: Array,
- *   onToggleCalendar: (id: string) => void,
- *   onToggleSharedEvent: (id: string) => void,
- *   onAddEvent: () => void,
- *   onAddCalendar: () => void,
- *   onEditCalendar: (calendar: object) => void,
- *   isMobileOpen?: boolean,
- *   onCloseMobile?: () => void,
- * }} props
- */
 export default function Sidebar({
     serviceName,
     myCalendars,
@@ -39,7 +24,6 @@ export default function Sidebar({
 
     return (
         <>
-            {/* Overlay для мобильной версии */}
             {isMobileOpen && onCloseMobile && (
                 <div 
                     className={`sidebar-overlay ${isMobileOpen ? 'sidebar-overlay--visible' : ''}`}
@@ -48,7 +32,6 @@ export default function Sidebar({
             )}
             
             <aside className={`sidebar ${isMobileOpen ? 'sidebar--mobile-open' : ''}`}>
-                {/* Назва сервісу зверху */}
                 <div className="sidebar__brand">
                 <span 
                     className="sidebar__brand-title"
@@ -60,7 +43,6 @@ export default function Sidebar({
                 </span>
             </div>
 
-            {/* Блок "your calendars" */}
             <div className="sidebar__section">
                 <button
                     className="sidebar__section-header"
@@ -115,7 +97,6 @@ export default function Sidebar({
                     )}
                 </div>
 
-                {/* shared calendars */}
                 <div className="sidebar__subsection">
                     <button
                         className="sidebar__subsection-header"
@@ -163,7 +144,6 @@ export default function Sidebar({
                 </div>
             </div>
 
-            {/* Блок "Shared events" */}
             {sharedEvents.length > 0 && (
                 <div className="sidebar__section">
                     <div className="sidebar__subsection">
@@ -207,7 +187,6 @@ export default function Sidebar({
                 </div>
             )}
 
-            {/* Кнопки в самому низу */}
             <div className="sidebar__footer">
                 <button className="sidebar__btn" onClick={onAddEvent}>
                     + event

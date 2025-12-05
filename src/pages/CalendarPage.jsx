@@ -28,10 +28,8 @@ export default function CalendarPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // Toast уведомления
     const { toast, showToast, hideToast } = useToast();
 
-    // Проверяем токен — если нет, редирект на логин
     const token = useSelector((s) => s.auth.token);
     const user = useSelector((s) => s.auth.user);
     
@@ -41,7 +39,6 @@ export default function CalendarPage() {
         }
     }, [token, navigate]);
 
-    // Загрузка данных пользователя при инициализации (если есть токен, но нет данных пользователя)
     useEffect(() => {
         const loadUser = async () => {
             if (token && !user) {
@@ -50,7 +47,6 @@ export default function CalendarPage() {
                     dispatch(updateUser(userData));
                 } catch (error) {
                     console.error('Error loading user:', error);
-                    // Если ошибка 401, токен невалидный - очищаем и редиректим на логин
                     if (error?.response?.status === 401) {
                         dispatch(logout());
                         navigate("/login", { replace: true });
@@ -72,13 +68,11 @@ export default function CalendarPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
-    // Обработчик клика на ячейку дня - открывает модальное окно создания события
     const handleDateClick = useCallback((date) => {
         setSelectedDate(date);
         setIsEventModalOpen(true);
     }, []);
 
-    // Навигация по месяцам
     const handlePrevMonth = useCallback(() => {
         setActiveDate((prev) => {
             const d = new Date(prev);
@@ -100,7 +94,6 @@ export default function CalendarPage() {
         setSelectedDate(new Date());
     }, []);
 
-    // Модальные окна
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isEditCalendarModalOpen, setIsEditCalendarModalOpen] = useState(false);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
@@ -108,20 +101,17 @@ export default function CalendarPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeletingCalendar, setIsDeletingCalendar] = useState(false);
     
-    // Детали события
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     
-    // Модальное окно всех событий дня
     const [dayEventsModal, setDayEventsModal] = useState({
         isOpen: false,
         date: null,
         events: [],
     });
 
-    // Загрузка календарей и shared events при монтировании (если авторизован)
     useEffect(() => {
         if (token) {
             dispatch(loadCalendars());
@@ -129,13 +119,9 @@ export default function CalendarPage() {
         }
     }, [dispatch, token]);
 
-    // Загрузка событий при изменении диапазона
     useEffect(() => {
-        // Если диапазон ещё не известен — нечего загружать
         if (!visibleRange) return;
 
-        // Если пользователь отключил все календари — очищаем события,
-        // чтобы в сетке не оставались старые данные
         if (!selectedIds.length) {
             dispatch(clearEvents());
             return;
@@ -151,7 +137,6 @@ export default function CalendarPage() {
         );
     }, [dispatch, visibleRange, selectedIds, filters.types, selectedSharedIds]);
 
-    // Подготовка календарей для UI
     const uiCalendars = useMemo(
         () =>
             calendars.map((c) => ({
@@ -164,7 +149,6 @@ export default function CalendarPage() {
     const myCalendars = uiCalendars.filter((c) => c.role === "owner");
     const sharedCalendars = uiCalendars.filter((c) => c.role !== "owner");
 
-    // Подготовка shared events для UI
     const visibleSharedEvents = useMemo(
         () =>
             sharedEventsItems.map((e) => {
@@ -177,36 +161,30 @@ export default function CalendarPage() {
         [sharedEventsItems, selectedSharedIds]
     );
 
-    // Handlers
     const handleLogout = () => {
         dispatch(logout());
         navigate("/login");
     };
 
-    // Создание календаря
     const handleCreateCalendar = useCallback(async (data) => {
         setIsSubmitting(true);
         try {
             await createCalendar(data);
             setIsCalendarModalOpen(false);
             showToast("Calendar created successfully!", "success");
-            // Перезагружаем список календарей
             dispatch(loadCalendars());
         } catch (err) {
-            // Ошибка будет показана в модалке
             throw err;
         } finally {
             setIsSubmitting(false);
         }
     }, [dispatch, showToast]);
 
-    // Редактирование календаря
     const handleEditCalendar = useCallback((calendar) => {
         setSelectedCalendar(calendar || null);
         setIsEditCalendarModalOpen(true);
     }, []);
 
-    // Обновление календаря
     const handleUpdateCalendar = useCallback(async (calendarId, data) => {
         setIsSubmitting(true);
         try {
@@ -214,17 +192,14 @@ export default function CalendarPage() {
             setIsEditCalendarModalOpen(false);
             setSelectedCalendar(null);
             showToast("Calendar updated successfully!", "success");
-            // Перезагружаем список календарей
             dispatch(loadCalendars());
         } catch (err) {
-            // Ошибка будет показана в модалке
             throw err;
         } finally {
             setIsSubmitting(false);
         }
     }, [dispatch, showToast]);
 
-    // Удаление календаря
     const handleDeleteCalendar = useCallback(async (calendarId) => {
         setIsDeletingCalendar(true);
         try {
@@ -232,7 +207,6 @@ export default function CalendarPage() {
             setIsEditCalendarModalOpen(false);
             setSelectedCalendar(null);
             showToast("Calendar deleted successfully!", "success");
-            // Перезагружаем список календарей
             dispatch(loadCalendars());
         } catch (err) {
             showToast("Failed to delete calendar", "error");
@@ -242,17 +216,13 @@ export default function CalendarPage() {
         }
     }, [dispatch, showToast]);
 
-    // Создание события
     const handleCreateEvent = useCallback(async (calendarId, data) => {
         setIsSubmitting(true);
         try {
             const result = await createEvent(calendarId, data);
             setIsEventModalOpen(false);
             showToast("Event created successfully!", "success");
-            // Увеличиваем задержку перед перезагрузкой, чтобы сервер успел сохранить событие
-            // Особенно важно для allDay событий, где сервер удаляет startAt/endAt
             setTimeout(() => {
-                // Перезагружаем события
                 if (visibleRange && selectedIds.length) {
                     dispatch(
                         loadEventsForRange({
@@ -265,20 +235,17 @@ export default function CalendarPage() {
                 }
             }, 500);
         } catch (err) {
-            // Ошибка будет показана в модалке
             throw err;
         } finally {
             setIsSubmitting(false);
         }
     }, [dispatch, visibleRange, selectedIds, filters.types, showToast]);
 
-    // Открытие деталей события
     const handleEventClick = useCallback((event) => {
         setSelectedEvent(event);
         setIsEventDetailOpen(true);
     }, []);
 
-    // Открытие модального окна всех событий дня
     const handleShowAllEvents = useCallback((date, events) => {
         setDayEventsModal({
             isOpen: true,
@@ -287,7 +254,6 @@ export default function CalendarPage() {
         });
     }, []);
 
-    // Удаление события
     const handleDeleteEvent = useCallback(async (calendarId, eventId) => {
         setIsDeleting(true);
         try {
@@ -295,7 +261,6 @@ export default function CalendarPage() {
             setIsEventDetailOpen(false);
             setSelectedEvent(null);
             showToast("Event deleted successfully!", "success");
-            // Перезагружаем события
             if (visibleRange && selectedIds.length) {
                 dispatch(
                     loadEventsForRange({
@@ -314,20 +279,16 @@ export default function CalendarPage() {
         }
     }, [dispatch, visibleRange, selectedIds, filters.types, showToast]);
 
-    // Обновление события
     const handleUpdateEvent = useCallback(async (calendarId, eventId, data) => {
         setIsUpdating(true);
         try {
             const result = await updateEvent(calendarId, eventId, data);
-            // Обновляем selectedEvent с новыми данными
-            // updateEvent возвращает событие напрямую, а не обернутое в { event: ... }
             setSelectedEvent((prev) => ({
                 ...prev,
                 ...result,
                 id: result?._id || result?.id || eventId,
             }));
             showToast("Event updated successfully!", "success");
-            // Перезагружаем события
             if (visibleRange && selectedIds.length) {
                 dispatch(
                     loadEventsForRange({
@@ -346,7 +307,6 @@ export default function CalendarPage() {
         }
     }, [dispatch, visibleRange, selectedIds, filters.types, showToast]);
 
-    // Показываем загрузку пока нет токена
     if (!token) {
         return null;
     }
@@ -390,7 +350,6 @@ export default function CalendarPage() {
                 />
             </div>
 
-            {/* Модалка деталей события */}
             <EventDetailModal
                 isOpen={isEventDetailOpen}
                 onClose={() => {
@@ -404,7 +363,6 @@ export default function CalendarPage() {
                 isUpdating={isUpdating}
             />
 
-            {/* Модалка создания календаря */}
             <CreateCalendarModal
                 isOpen={isCalendarModalOpen}
                 onClose={() => setIsCalendarModalOpen(false)}
@@ -412,7 +370,6 @@ export default function CalendarPage() {
                 isLoading={isSubmitting}
             />
 
-            {/* Модалка редактирования календаря */}
             <EditCalendarModal
                 isOpen={isEditCalendarModalOpen}
                 onClose={() => {
@@ -426,7 +383,6 @@ export default function CalendarPage() {
                 isDeleting={isDeletingCalendar}
             />
 
-            {/* Модалка создания события */}
             <CreateEventModal
                 isOpen={isEventModalOpen}
                 onClose={() => {
@@ -439,7 +395,6 @@ export default function CalendarPage() {
                 isLoading={isSubmitting}
             />
 
-            {/* Модальное окно всех событий дня */}
             <DayEventsModal
                 isOpen={dayEventsModal.isOpen}
                 onClose={() => setDayEventsModal({ isOpen: false, date: null, events: [] })}
@@ -448,7 +403,6 @@ export default function CalendarPage() {
                 onEventClick={handleEventClick}
             />
 
-            {/* Модальное окно всех событий дня */}
             <DayEventsModal
                 isOpen={dayEventsModal.isOpen}
                 onClose={() => setDayEventsModal({ isOpen: false, date: null, events: [] })}
@@ -457,7 +411,6 @@ export default function CalendarPage() {
                 onEventClick={handleEventClick}
             />
 
-            {/* Toast уведомления */}
             <Toast
                 message={toast.message}
                 type={toast.type}

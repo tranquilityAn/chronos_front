@@ -1,60 +1,37 @@
 import api from "../../app/api";
 
-/**
- * GET /api/calendars
- * Сервер возвращает: { calendars: [{ role, joinedAt, calendar: {...} }, ...] }
- */
 export const fetchMyCalendars = async () => {
     const { data } = await api.get("api/calendars");
-    // Парсим ответ сервера: извлекаем calendar из каждого membership
     const calendars = (data?.calendars ?? [])
         .map((m) => ({
             ...m.calendar,
-            role: m.role,        // сохраняем роль пользователя
-            joinedAt: m.joinedAt // когда присоединился
+            role: m.role,
+            joinedAt: m.joinedAt
         }))
-        .filter((c) => c.id); // фильтруем пустые
+        .filter((c) => c.id);
     return calendars;
 };
 
-/**
- * POST /api/calendars
- * body: { type, name, description?, color? }
- */
 export const createCalendar = async (body) => {
     const { data } = await api.post("api/calendars", body);
     return data.calendar;
 };
 
-/**
- * GET /api/calendars/:id
- */
 export const getCalendar = async (calendarId) => {
     const { data } = await api.get(`api/calendars/${calendarId}`);
     return data.calendar;
 };
 
-/**
- * PATCH /api/calendars/:id
- * body: { name?, description?, color? }
- */
 export const updateCalendar = async (calendarId, body) => {
     const { data } = await api.patch(`api/calendars/${calendarId}`, body);
     return data.calendar;
 };
 
-/**
- * DELETE /api/calendars/:id
- */
 export const deleteCalendar = async (calendarId) => {
     await api.delete(`api/calendars/${calendarId}`);
     return true;
 };
 
-/**
- * POST /api/calendars/:calendarId/invite
- * body: { email: string, role: "viewer" | "editor" }
- */
 export const inviteToCalendar = async (calendarId, { email, role }) => {
     console.log("API: Inviting to calendar", { calendarId, email, role });
     try {
@@ -70,27 +47,16 @@ export const inviteToCalendar = async (calendarId, { email, role }) => {
     }
 };
 
-/**
- * GET /api/calendars/:calendarId/members
- * Сервер возвращает: { members: [{ role, status, joinedAt, user: {...} }, ...] }
- */
 export const listCalendarMembers = async (calendarId) => {
     const { data } = await api.get(`api/calendars/${calendarId}/members`);
     return data.members || [];
 };
 
-/**
- * DELETE /api/calendars/:calendarId/members/:userId
- */
 export const removeCalendarMember = async (calendarId, userId) => {
     await api.delete(`api/calendars/${calendarId}/members/${userId}`);
     return true;
 };
 
-/**
- * PATCH /api/calendars/:calendarId/members/:userId
- * body: { role: "viewer" | "editor" }
- */
 export const updateCalendarMemberRole = async (calendarId, userId, { role }) => {
     const { data } = await api.patch(`api/calendars/${calendarId}/members/${userId}`, {
         role,
@@ -98,17 +64,6 @@ export const updateCalendarMemberRole = async (calendarId, userId, { role }) => 
     return data;
 };
 
-/**
- * GET /api/calendars/accept-invite?token=...
- * 
- * Возможные ответы сервера:
- * - Успешное принятие: 200 OK с { calendar: { id, name, color }, role }
- * - Токен уже использован/протух: 400 Bad Request с { error: "TOKEN_INVALID_OR_EXPIRED", message: "The token is invalid or has expired" }
- *   Примечание: если токен уже использован, но пользователь уже является участником календаря,
- *   это не является реальной ошибкой - пользователь уже имеет доступ к календарю.
- * - Пользователь не авторизован: 401 Unauthorized
- * - Другие ошибки: 403 Forbidden с различными сообщениями (например, "No pending invite found for this user")
- */
 export const acceptCalendarInvite = async (token) => {
     console.log("API: Accepting calendar invite", { token: token?.substring(0, 10) + "..." });
     try {
@@ -123,10 +78,6 @@ export const acceptCalendarInvite = async (token) => {
     }
 };
 
-/**
- * GET /api/calendars/decline-invite?token=...
- * Сервер возвращает: { success: true }
- */
 export const declineCalendarInvite = async (token) => {
     console.log("API: Declining calendar invite", { token: token?.substring(0, 10) + "..." });
     try {

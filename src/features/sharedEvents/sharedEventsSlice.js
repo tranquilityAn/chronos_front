@@ -18,18 +18,12 @@ const slice = createSlice({
         setSelectedSharedEvents(state, action) {
             state.selectedIds = action.payload.map((id) => String(id));
         },
-        /**
-         * Удаляет shared-ивент (и его видимость) после выхода пользователя из события.
-         * Принимает ID записи shared-ивента (event.sharedItemId / ev.id / ev._id).
-         */
         removeSharedEventById(state, action) {
             const targetId = String(action.payload);
-            // Удаляем сам shared-item
             state.items = state.items.filter((item) => {
                 const itemId = item.id || item._id;
                 return String(itemId) !== targetId;
             });
-            // И убираем его из списка выбранных для отображения
             state.selectedIds = state.selectedIds.filter(
                 (id) => String(id) !== targetId
             );
@@ -43,7 +37,6 @@ const slice = createSlice({
         b.addCase(loadSharedEvents.fulfilled, (s, a) => {
             s.status = "succeeded";
             s.items = a.payload;
-            // Auto-select all on first load if selectedIds is empty
             if (!s.selectedIds.length) {
                 s.selectedIds = a.payload
                     .map((e) => String(e.id || e._id))
@@ -59,4 +52,3 @@ const slice = createSlice({
 
 export const { toggleSharedEventVisibility, setSelectedSharedEvents, removeSharedEventById } = slice.actions;
 export default slice.reducer;
-

@@ -30,14 +30,12 @@ export default function ProfilePage() {
     });
     const fileInputRef = useRef(null);
 
-    // Проверка авторизации
     useEffect(() => {
         if (!token) {
             navigate('/login', { replace: true });
         }
     }, [token, navigate]);
 
-    // Загрузка данных пользователя
     useEffect(() => {
         const loadUser = async () => {
             if (!token) return;
@@ -49,7 +47,7 @@ export default function ProfilePage() {
                 console.log('Avatar URL:', userData?.avatar);
                 setUser(userData);
                 dispatch(updateUserAction(userData));
-                setAvatarError(false); // Сбрасываем ошибку при загрузке
+                setAvatarError(false);
                 setFormData({
                     name: userData.name || '',
                     country: userData.country || '',
@@ -63,10 +61,8 @@ export default function ProfilePage() {
         };
 
         loadUser();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, dispatch]);
 
-    // Сбрасываем ошибку при изменении аватара
     useEffect(() => {
         setAvatarError(false);
     }, [user?.avatar]);
@@ -86,7 +82,6 @@ export default function ProfilePage() {
                 name: formData.name || '',
                 country: formData.country || '',
             });
-            // Перезагружаем данные с сервера для получения актуальной информации
             const freshUserData = await getCurrentUser();
             setUser(freshUserData);
             dispatch(updateUserAction(freshUserData));
@@ -122,13 +117,11 @@ export default function ProfilePage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Проверка типа файла
         if (!file.type.startsWith('image/')) {
             showToast('Please Select An Image', 'error');
             return;
         }
 
-        // Проверка размера (максимум 5MB)
         if (file.size > 5 * 1024 * 1024) {
             showToast('File Size Must Not Exceed 5MB', 'error');
             return;
@@ -137,18 +130,17 @@ export default function ProfilePage() {
         try {
             setIsUploadingAvatar(true);
             await updateUserAvatar(file);
-            // Перезагружаем данные с сервера для получения актуального аватара
             const freshUserData = await getCurrentUser();
             setUser(freshUserData);
             dispatch(updateUserAction(freshUserData));
-            setAvatarError(false); // Сбрасываем ошибку после успешного обновления
+            setAvatarError(false);
             showToast('Avatar Updated Successfully', 'success');
         } catch (error) {
             console.error('Error updating avatar:', error);
             showToast(error?.response?.data?.error || 'Error Updating Avatar', 'error');
         } finally {
             setIsUploadingAvatar(false);
-            e.target.value = ''; // Сброс input
+            e.target.value = '';
         }
     };
 
@@ -185,31 +177,25 @@ export default function ProfilePage() {
     };
 
     const getInitials = (name, email) => {
-        // Если есть имя, формируем инициалы из имени
         if (name && typeof name === 'string' && name.trim()) {
             const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
             if (parts.length >= 2) {
-                // Если несколько слов, берем первую букву первого и последнего слова
                 const first = parts[0][0] || '';
                 const last = parts[parts.length - 1][0] || '';
                 return (first + last).toUpperCase();
             }
             if (parts.length === 1 && parts[0].length >= 2) {
-                // Если одно слово, берем первые две буквы
                 return parts[0].substring(0, 2).toUpperCase();
             }
             if (parts.length === 1) {
-                // Если одно слово из одной буквы
                 return parts[0][0].toUpperCase();
             }
         }
         
-        // Если имени нет, формируем из email
         if (email && typeof email === 'string' && email.trim()) {
             const emailClean = email.trim();
             const atIndex = emailClean.indexOf('@');
             if (atIndex > 0) {
-                // Берем первые две буквы до символа @
                 const beforeAt = emailClean.substring(0, atIndex);
                 if (beforeAt.length >= 2) {
                     return beforeAt.substring(0, 2).toUpperCase();
@@ -222,7 +208,6 @@ export default function ProfilePage() {
             return emailClean[0].toUpperCase();
         }
         
-        // Если ничего нет, возвращаем дефолтный символ
         return 'U';
     };
 
@@ -262,7 +247,7 @@ export default function ProfilePage() {
         );
     }
 
-    const isLoadingForHeader = false; // Для HeaderBar
+    const isLoadingForHeader = false;
 
     return (
         <div className="profile-page-wrapper">
@@ -282,7 +267,6 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="profile-page__content">
-                        {/* Аватар */}
                         <div className="profile-page__avatar-section">
                             <div 
                                 className={`profile-page__avatar-wrapper ${isUploadingAvatar ? 'profile-page__avatar-wrapper--loading' : ''}`}
@@ -301,18 +285,16 @@ export default function ProfilePage() {
                                         return (
                                             <>
                                                 <img 
-                                                    key={user.avatar} // Добавляем key для перезагрузки при изменении
+                                                    key={user.avatar}
                                                     src={user.avatar} 
                                                     alt={user.name || user.email}
                                                     className="profile-page__avatar"
                                                     onError={(e) => {
-                                                        // Если изображение не загрузилось, показываем инициалы
                                                         console.error('Failed to load avatar image:', user.avatar);
                                                         setAvatarError(true);
                                                         e.target.style.display = 'none';
                                                     }}
                                                     onLoad={() => {
-                                                        // Успешно загружено, сбрасываем ошибку
                                                         setAvatarError(false);
                                                     }}
                                                 />
@@ -353,7 +335,6 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        {/* Информация о пользователе */}
                         <div className="profile-page__info">
                             <div className="profile-page__info-row">
                                 <label className="profile-page__label">Email</label>
@@ -400,7 +381,6 @@ export default function ProfilePage() {
                                 )}
                             </div>
 
-                            {/* Кнопки действий */}
                             <div className="profile-page__actions">
                                 {isEditing ? (
                                     <>
@@ -442,7 +422,6 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Модальное окно подтверждения удаления */}
             {isConfirmDeleteOpen && (
                 <div className="profile-page__modal-backdrop">
                     <div className="profile-page__modal">
@@ -470,7 +449,6 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            {/* Toast уведомления */}
             <Toast
                 message={toast.message}
                 type={toast.type}

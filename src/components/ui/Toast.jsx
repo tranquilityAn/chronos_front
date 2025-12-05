@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../styles/modal.css";
 
-/**
- * Toast уведомление
- * @param {{
- *   message: string,
- *   type: 'success' | 'error' | 'info',
- *   isVisible: boolean,
- *   onClose: () => void,
- *   duration?: number
- * }} props
- */
 export default function Toast({ 
     message, 
     type = "info", 
@@ -24,14 +14,12 @@ export default function Toast({
         if (isVisible && duration > 0) {
             const timer = setTimeout(() => {
                 setIsClosing(true);
-                // Ждем завершения анимации перед вызовом onClose
                 setTimeout(onClose, 300);
             }, duration);
             return () => clearTimeout(timer);
         }
     }, [isVisible, duration, onClose]);
 
-    // Сброс состояния закрытия при новом показе
     useEffect(() => {
         if (isVisible) {
             setIsClosing(false);
@@ -60,9 +48,6 @@ export default function Toast({
     );
 }
 
-/**
- * Хук для управления toast уведомлениями
- */
 export function useToast() {
     const [toast, setToast] = useState({
         isVisible: false,

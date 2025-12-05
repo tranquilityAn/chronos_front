@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 
-// Бэкенд использует "arrangement" для meetings (MongoDB discriminator)
 const EVENT_TYPES = [
     { value: "arrangement", label: "Meeting" },
     { value: "reminder", label: "Reminder" },
     { value: "task", label: "Task" },
 ];
 
-/**
- * Форматирует дату для input[type="datetime-local"]
- */
 function toLocalDatetime(date) {
     if (!date) return "";
     const d = new Date(date);
@@ -19,17 +15,6 @@ function toLocalDatetime(date) {
     return local.toISOString().slice(0, 16);
 }
 
-/**
- * Модальное окно создания события
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   onSubmit: (calendarId: string, data: object) => Promise<void>,
- *   calendars: Array<{ id: string, name: string, color: string }>,
- *   selectedDate?: Date,
- *   isLoading?: boolean
- * }} props
- */
 export default function CreateEventModal({
     isOpen,
     onClose,
@@ -43,19 +28,15 @@ export default function CreateEventModal({
         type: "arrangement",
         title: "",
         description: "",
-        // Arrangement (Meeting) fields
         allDay: false,
         startAt: "",
         endAt: "",
         location: "",
-        // Reminder field
         remindAt: "",
-        // Task fields
         dueAt: "",
     });
     const [error, setError] = useState("");
 
-    // Установка дефолтных значений при открытии
     useEffect(() => {
         if (isOpen) {
             const defaultCalendar = calendars.find((c) => c.type === "primary") || calendars[0];
@@ -86,7 +67,6 @@ export default function CreateEventModal({
         e.preventDefault();
         setError("");
 
-        // Валидация
         if (!formData.calendarId) {
             setError("Please select a calendar");
             return;
@@ -100,7 +80,6 @@ export default function CreateEventModal({
             return;
         }
 
-        // Подготовка данных в зависимости от типа
         const payload = {
             type: formData.type,
             title: formData.title.trim(),
@@ -110,18 +89,13 @@ export default function CreateEventModal({
         if (formData.type === "arrangement") {
             payload.allDay = formData.allDay;
             if (formData.allDay) {
-                // Для allDay событий сервер удаляет startAt/endAt (pre-save hook)
-                // Но валидация на сервере может требовать startAt для определения даты
-                // Отправляем startAt для валидации, но понимаем, что он не сохранится
                 if (!formData.startAt) {
                     setError("Start date is required");
                     return;
                 }
                 const startDate = new Date(formData.startAt);
                 startDate.setHours(0, 0, 0, 0);
-                // Отправляем startAt для валидации, но сервер его удалит для allDay
                 payload.startAt = startDate.toISOString();
-                // endAt не обязателен для allDay, но можно отправить для валидации
                 const endDate = new Date(startDate);
                 endDate.setHours(23, 59, 59, 999);
                 payload.endAt = endDate.toISOString();
@@ -162,7 +136,6 @@ export default function CreateEventModal({
 
         try {
             await onSubmit(formData.calendarId, payload);
-            // Сброс формы
             resetForm();
         } catch (err) {
             setError(err?.response?.data?.message || err.message || "Failed to create event");
@@ -193,7 +166,6 @@ export default function CreateEventModal({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title="Create Event">
             <form className="modal-form" onSubmit={handleSubmit}>
-                {/* Выбор календаря */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">
                         Calendar <span className="modal-form__required">*</span>
@@ -212,7 +184,6 @@ export default function CreateEventModal({
                     </select>
                 </div>
 
-                {/* Тип события */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">Event Type</label>
                     <div className="modal-form__radio-group">
@@ -231,7 +202,6 @@ export default function CreateEventModal({
                     </div>
                 </div>
 
-                {/* Название */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">
                         Title <span className="modal-form__required">*</span>
@@ -248,7 +218,6 @@ export default function CreateEventModal({
                     />
                 </div>
 
-                {/* Описание */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">Description</label>
                     <textarea
@@ -262,7 +231,6 @@ export default function CreateEventModal({
                     />
                 </div>
 
-                {/* Поля для Meeting (arrangement) */}
                 {formData.type === "arrangement" && (
                     <>
                         <div className="modal-form__group">
@@ -321,7 +289,6 @@ export default function CreateEventModal({
                     </>
                 )}
 
-                {/* Поля для Reminder */}
                 {formData.type === "reminder" && (
                     <div className="modal-form__group">
                         <label className="modal-form__label">
@@ -337,7 +304,6 @@ export default function CreateEventModal({
                     </div>
                 )}
 
-                {/* Поля для Task */}
                 {formData.type === "task" && (
                     <div className="modal-form__group">
                         <label className="modal-form__label">
@@ -353,10 +319,8 @@ export default function CreateEventModal({
                     </div>
                 )}
 
-                {/* Ошибка */}
                 {error && <div className="modal-form__error">{error}</div>}
 
-                {/* Кнопки */}
                 <div className="modal-form__actions">
                     <button
                         type="button"

@@ -2,17 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import UserAvatar from '../ui/UserAvatar';
 
-/**
- * @param {{
- *   activeDate: Date,
- *   onPrevMonth: () => void,
- *   onNextMonth: () => void,
- *   onToday: () => void,
- *   onLogout?: () => void,
- *   isLoading?: boolean,
- *   onToggleSidebar?: () => void
- * }} props
- */
 export default function HeaderBar({ 
     activeDate, 
     onPrevMonth,
@@ -36,7 +25,6 @@ export default function HeaderBar({
         navigate('/');
     };
 
-    // Если страница профиля - показываем только "Houdini" как ссылку
     if (isProfilePage) {
         return (
             <header className="headerbar">
@@ -56,7 +44,6 @@ export default function HeaderBar({
 
     return (
         <header className="headerbar">
-            {/* Ліво: навігація по місяцях */}
             <div className="headerbar__left">
                 {onToggleSidebar && (
                     <button 
@@ -94,12 +81,9 @@ export default function HeaderBar({
                 {isLoading && <span className="headerbar__loading">Loading...</span>}
             </div>
 
-            {/* Центр: пошук, тип івенту — TODO */}
             <div className="headerbar__center">
-                {/* TODO: search bar, select "event type" */}
             </div>
 
-            {/* Право: имя пользователя и навигация */}
             <div className="headerbar__right">
                 {user?.name && (
                     <span className="headerbar__user-name">{user.name}</span>

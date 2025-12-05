@@ -4,7 +4,6 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--main-color);
-    /* background-color: var(--second-color)zvzv; */
     color: var(--main-text-color);
     
 }
@@ -43,8 +42,8 @@ a{
     background-image:
      linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.5) 0%,    /*zz тёмно сверху */
-      rgba(0, 0, 0, 0.0) 25%    /* исчезает вниз */
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.0) 25%
     ),
     linear-gradient(
       to right,
@@ -55,17 +54,15 @@ a{
     ), url(../../public/skull.jpg);
     flex: 1;
     background-size: cover;
-    background-position: center;  /* выровнять по центру */
+    background-position: center;
     background-repeat: no-repeat;
     overflow: hidden;
 }
 .container-login {
     background-color: var(--main-color);
-    /* background-color: var(--alt-main-color); zvzv*/
     height: 100%;
     display: flex;
     flex-direction: column;
-    /* align-items: left; */
     justify-content: center;
 
     width: 35%;
@@ -75,11 +72,8 @@ a{
 .container-second-color{
    display: flex;
    flex-direction: column;
-    /* justify-content: space-around; */
-   /* padding-right:15px; */
 
    padding-left: 20%;
-   /* background-color: var(--alt-main-color); */
 
 }
 h2{
@@ -88,7 +82,6 @@ h2{
     color:var(--main-text-color);
 }
 form{
-    /* padding-top:8% ; zzz*/ 
     flex: 1;
     display: flex;
     flex-direction: column;

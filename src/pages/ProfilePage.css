@@ -316,7 +316,6 @@
     color: var(--error-color);
 }
 
-/* Модальное окно подтверждения удаления */
 .profile-page__modal-backdrop {
     position: fixed;
     top: 0;
@@ -360,7 +359,6 @@
     margin-top: 24px;
 }
 
-/* Адаптивность */
 @media (max-width: 767px) {
     .profile-page {
         padding: 16px;

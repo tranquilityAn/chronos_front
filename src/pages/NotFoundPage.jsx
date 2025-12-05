@@ -7,18 +7,14 @@ export default function NotFoundPage() {
 
   const playAudio = () => {
     if (audioRef.current) {
-      // Сбрасываем текущее время, чтобы воспроизвести с начала
       audioRef.current.currentTime = 0;
       const playPromise = audioRef.current.play();
       
-      // Обрабатываем промис, так как play() возвращает Promise
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            // Воспроизведение успешно началось
           })
           .catch((error) => {
-            // Воспроизведение заблокировано - это нормально
             console.log("Audio play was prevented:", error);
           });
       }
@@ -26,7 +22,6 @@ export default function NotFoundPage() {
   };
 
   useEffect(() => {
-    // Принудительно воспроизводим аудио при загрузке страницы
     playAudio();
   }, []);
 

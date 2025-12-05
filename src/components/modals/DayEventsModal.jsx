@@ -1,8 +1,5 @@
 import Modal from "../ui/Modal";
 
-/**
- * Форматирует время события
- */
 function formatEventTime(event) {
     const type = event.type === "arrangement" ? "meeting" : event.type;
     
@@ -39,9 +36,6 @@ function formatEventTime(event) {
     return null;
 }
 
-/**
- * Возвращает название типа события
- */
 function getEventTypeLabel(type) {
     switch (type) {
         case "arrangement":
@@ -55,17 +49,11 @@ function getEventTypeLabel(type) {
     }
 }
 
-/**
- * Возвращает CSS класс для типа события
- */
 function getEventTypeClass(type) {
     if (type === "arrangement") return "meeting";
     return type || "default";
 }
 
-/**
- * Форматирует дату для заголовка
- */
 function formatDate(date) {
     if (!date) return "";
     const d = new Date(date);
@@ -77,16 +65,6 @@ function formatDate(date) {
     });
 }
 
-/**
- * Модальное окно со всеми событиями дня
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   date: Date | null,
- *   events: Array,
- *   onEventClick: (event: object) => void
- * }} props
- */
 export default function DayEventsModal({
     isOpen,
     onClose,

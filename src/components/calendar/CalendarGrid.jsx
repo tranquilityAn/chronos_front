@@ -2,10 +2,6 @@ import { useEffect, useMemo } from "react";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-/**
- * Форматирует дату в локальном часовом поясе как YYYY-MM-DD
- * Важно использовать локальное время для соответствия с eventsByDate
- */
 function getKey(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -13,10 +9,6 @@ function getKey(date) {
     return `${year}-${month}-${day}`;
 }
 
-/**
- * Нормализует тип события для отображения
- * Бэкенд возвращает "arrangement" вместо "meeting"
- */
 function normalizeEventType(type) {
     if (type === "arrangement") return "meeting";
     return type;
@@ -25,7 +17,6 @@ function normalizeEventType(type) {
 function formatEventTime(event) {
     const type = normalizeEventType(event.type);
     
-    // Meeting/Arrangement
     if (type === "meeting") {
         if (event.allDay) return "All day";
         if (event.startAt) {
@@ -38,7 +29,6 @@ function formatEventTime(event) {
         }
     }
     
-    // Reminder
     if (type === "reminder" && event.remindAt) {
         const d = new Date(event.remindAt);
         return d.toLocaleTimeString("en-US", { 
@@ -48,7 +38,6 @@ function formatEventTime(event) {
         });
     }
     
-    // Task
     if (type === "task" && event.dueAt) {
         const d = new Date(event.dueAt);
         return d.toLocaleTimeString("en-US", { 
@@ -61,17 +50,11 @@ function formatEventTime(event) {
     return null;
 }
 
-/**
- * Возвращает CSS класс для типа события
- */
 function getEventTypeClass(type) {
     const normalized = normalizeEventType(type);
     return normalized || "default";
 }
 
-/**
- * Возвращает текст типа события для отображения
- */
 function getEventTypeLabel(type) {
     const normalized = normalizeEventType(type);
     switch (normalized) {
@@ -86,17 +69,6 @@ function getEventTypeLabel(type) {
     }
 }
 
-/**
- * @param {{
- *   activeDate: Date,
- *   eventsByDate: Record<string, Array>,
- *   selectedDate: Date | null,
- *   onSelectDate: (d: Date) => void,
- *   onRangeChange: ({ from: string, to: string }) => void,
- *   onEventClick: (event: object) => void,
- *   onShowAllEvents: (date: Date, events: Array) => void,
- * }} props
- */
 export default function CalendarGrid({
     activeDate,
     eventsByDate,
@@ -133,7 +105,6 @@ export default function CalendarGrid({
         return { days: arr, from: fromDate, to: toDate };
     }, [activeDate]);
 
-    // повідомляємо сторінці видимий діапазон (використовуємо ISO строки для стабільного порівняння)
     const fromISO = from.toISOString();
     const toISO = to.toISOString();
     
@@ -150,7 +121,6 @@ export default function CalendarGrid({
 
     return (
         <div className="cal-grid">
-            {/* верхній рядок з назвами днів тижня */}
             <div className="cal-grid__weekdays">
                 {WEEKDAYS.map((d) => (
                     <div key={d} className="cal-grid__weekday">
@@ -159,7 +129,6 @@ export default function CalendarGrid({
                 ))}
             </div>
 
-            {/* сама сітка 6x7 */}
             <div className="cal-grid__cells">
                 {days.map((date) => {
                     const key = getKey(date);

@@ -1,18 +1,7 @@
 import { useEffect } from "react";
 import "../../styles/modal.css";
 
-/**
- * Базовый компонент модального окна с размытием фона
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   title?: string,
- *   children: React.ReactNode,
- *   closePosition?: "left" | "right"
- * }} props
- */
 export default function Modal({ isOpen, onClose, title, children, closePosition = "right" }) {
-    // Закрытие по Escape
     useEffect(() => {
         const handleEsc = (e) => {
             if (e.key === "Escape") onClose();

@@ -7,25 +7,16 @@ const CALENDAR_TYPES = [
 ];
 
 const COLORS = [
-    "#EDE986", // yellow (accent)
-    "#7AC74F", // green
-    "#5DADE2", // blue
-    "#AF7AC5", // purple
-    "#E86A5D", // red
-    "#F5B041", // orange
-    "#58D68D", // mint
-    "#85C1E9", // light blue
+    "#EDE986",
+    "#7AC74F",
+    "#5DADE2",
+    "#AF7AC5",
+    "#E86A5D",
+    "#F5B041",
+    "#58D68D",
+    "#85C1E9",
 ];
 
-/**
- * Модальное окно создания календаря
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   onSubmit: (data: { type: string, name: string, description?: string, color?: string }) => Promise<void>,
- *   isLoading?: boolean
- * }} props
- */
 export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoading }) {
     const [formData, setFormData] = useState({
         type: "ordinary",
@@ -49,7 +40,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
         e.preventDefault();
         setError("");
 
-        // Валидация
         if (!formData.name.trim()) {
             setError("Calendar name is required");
             return;
@@ -66,7 +56,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
                 description: formData.description.trim() || undefined,
                 color: formData.color,
             });
-            // Сброс формы после успешного создания
             setFormData({
                 type: "ordinary",
                 name: "",
@@ -92,7 +81,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title="Create Calendar">
             <form className="modal-form" onSubmit={handleSubmit}>
-                {/* Тип календаря */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">Type</label>
                     <select
@@ -109,7 +97,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
                     </select>
                 </div>
 
-                {/* Название */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">
                         Name <span className="modal-form__required">*</span>
@@ -126,7 +113,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
                     />
                 </div>
 
-                {/* Описание */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">Description</label>
                     <textarea
@@ -140,7 +126,6 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
                     />
                 </div>
 
-                {/* Цвет */}
                 <div className="modal-form__group">
                     <label className="modal-form__label">Color</label>
                     <div className="modal-form__colors">
@@ -158,10 +143,8 @@ export default function CreateCalendarModal({ isOpen, onClose, onSubmit, isLoadi
                     </div>
                 </div>
 
-                {/* Ошибка */}
                 {error && <div className="modal-form__error">{error}</div>}
 
-                {/* Кнопки */}
                 <div className="modal-form__actions">
                     <button
                         type="button"

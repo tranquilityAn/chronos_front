@@ -18,7 +18,6 @@ api.interceptors.response.use(
         const status = err?.response?.status;
         if (status === 401) {
             localStorage.removeItem('token');
-            // Редирект на login при протухшем/невалидном токене
             if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
                 window.location.href = '/login';
             }

@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { loginRequest, registerRequest } from './authApi';
 
-// --- Thunks ---
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
@@ -17,7 +16,6 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      // Валидация и нормализация email перед вызовом API
       const trimmedEmail = email?.trim() || '';
       if (!trimmedEmail) {
         return rejectWithValue('Email is required');
@@ -26,7 +24,6 @@ export const register = createAsyncThunk(
         return rejectWithValue('Password is required');
       }
       
-      // Передаем нормализованный email
       return await registerRequest({ email: trimmedEmail, password });
     } catch (err) {
       const errorMessage = err?.response?.data?.message || 
@@ -38,7 +35,6 @@ export const register = createAsyncThunk(
   }
 );
 
-// --- Slice ---
 const initialState = {
   user: null,
   token: localStorage.getItem('token') || null,
@@ -60,7 +56,6 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // login
     builder
       .addCase(login.pending, (state) => {
         state.status = 'loading';
@@ -77,7 +72,6 @@ const authSlice = createSlice({
         state.error = action.payload || 'Login failed';
       });
 
-    // register
     builder
       .addCase(register.pending, (state) => {
         state.status = 'loading';

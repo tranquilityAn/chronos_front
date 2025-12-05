@@ -1,14 +1,11 @@
 import api from '../../app/api.js';
 
-// POST /auth/login  { email, password }
 export const loginRequest = async ({ email, password }) => {
   const { data } = await api.post('api/auth/login', { email, password });
-  return data; // ожидается { user, token } или подобное
+  return data;
 };
 
-// POST /auth/register  { email, password }
 export const registerRequest = async ({ email, password }) => {
-  // Валидация перед отправкой
   const trimmedEmail = email?.trim() || '';
   if (!trimmedEmail) {
     throw new Error('Email is required');
@@ -17,10 +14,8 @@ export const registerRequest = async ({ email, password }) => {
     throw new Error('Password is required');
   }
   
-  // Нормализуем email (trim и lowercase)
   const normalizedEmail = trimmedEmail.toLowerCase();
   
-  // Проверяем, что email не пустой перед отправкой
   if (!normalizedEmail) {
     throw new Error('Email cannot be empty');
   }
@@ -30,10 +25,9 @@ export const registerRequest = async ({ email, password }) => {
     password 
   });
   
-  return data; // ожидается { user, token }/message — зависит от бэка
+  return data;
 };
 
-// GET /auth/verify-email?token=...
 export const verifyEmailRequest = async (token) => {
   const normalizedToken = String(token || '').trim();
 
@@ -45,5 +39,5 @@ export const verifyEmailRequest = async (token) => {
     params: { token: normalizedToken },
   });
 
-  return data; // ожидается { message: "Email verified successfully" }
+  return data;
 };

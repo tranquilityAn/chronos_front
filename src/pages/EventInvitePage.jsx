@@ -12,15 +12,13 @@ export default function EventInvitePage() {
     const dispatch = useDispatch();
     
     const token = useSelector((state) => state.auth.token);
-    const [status, setStatus] = useState("loading"); // loading, success, error, need-auth
+    const [status, setStatus] = useState("loading");
     const [message, setMessage] = useState("");
     const [eventInfo, setEventInfo] = useState(null);
     
-    // Защита от повторной обработки одного и того же токена
     const processedTokenRef = useRef(null);
 
     useEffect(() => {
-        // Определяем действие из пути URL
         const isAccept = location.pathname.includes("/accept");
         const isDecline = location.pathname.includes("/decline");
         const action = isAccept ? "accept" : isDecline ? "decline" : null;
@@ -31,7 +29,6 @@ export default function EventInvitePage() {
             return;
         }
 
-        // Получаем токен из URL параметра
         let inviteToken = searchParams.get("token");
 
         if (!inviteToken) {
@@ -49,26 +46,21 @@ export default function EventInvitePage() {
 
         console.log("Event invite token received, action:", action);
 
-        // Проверяем авторизацию
         if (!token) {
-            // Сохраняем полный URL для возврата после логина
             const returnUrl = `${location.pathname}${location.search}`;
             console.log("Not authenticated, redirecting to login with return URL:", returnUrl);
             setStatus("need-auth");
-            // Редирект на логин с сохранением URL для возврата
             setTimeout(() => {
                 navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`, { replace: true });
             }, 100);
             return;
         }
 
-        // Защита от повторной обработки: если этот токен уже обрабатывался, не запускаем снова
         if (processedTokenRef.current === inviteToken) {
             return;
         }
         processedTokenRef.current = inviteToken;
 
-        // Если авторизован, обрабатываем приглашение
         const processInvite = async () => {
             try {
                 setStatus("loading");
@@ -80,10 +72,8 @@ export default function EventInvitePage() {
                     setMessage(`You have successfully joined the event "${result.event?.title || "Unknown"}"`);
                     setStatus("success");
                     
-                    // Перезагружаем список shared events
                     dispatch(loadSharedEvents());
                     
-                    // Редирект на главную страницу через 2 секунды
                     setTimeout(() => {
                         navigate("/", { replace: true });
                     }, 2000);
@@ -92,37 +82,19 @@ export default function EventInvitePage() {
                     setMessage("You have declined the event invitation");
                     setStatus("success");
                     
-                    // Редирект на главную страницу через 2 секунды
                     setTimeout(() => {
                         navigate("/", { replace: true });
                     }, 2000);
                 }
             } catch (err) {
-                // Обработка ошибок с учетом различных сценариев
-                // 
-                // ВАЖНО: При повторном заходе по уже использованному токену бэкенд возвращает ошибку
-                // TOKEN_INVALID_OR_EXPIRED, но это не означает, что пользователь не имеет доступа к событию.
-                // Если пользователь уже принял приглашение ранее, он уже является участником события,
-                // и токен просто был помечен как использованный. В этом случае мы должны показать success,
-                // а не error. Проверяем это через загрузку списка shared events пользователя.
-                //
                 const errorCode = err?.response?.data?.error;
                 const errorMessage = err?.response?.data?.message || err?.response?.data?.error || err?.message;
                 const statusCode = err?.response?.status;
 
-                // Специальная обработка для TOKEN_INVALID_OR_EXPIRED (400):
-                // Если токен уже использован, но пользователь уже является участником события,
-                // это не является реальной ошибкой. Проверяем это через загрузку shared events.
-                // Только если загрузка shared events тоже не удалась, показываем реальную ошибку.
                 if (errorCode === "TOKEN_INVALID_OR_EXPIRED" || statusCode === 400) {
                     try {
-                        // Пытаемся загрузить shared events пользователя
-                        // Если загрузка успешна, значит пользователь уже имеет доступ к событиям
-                        // (включая то, на которое была ссылка)
                         const sharedEvents = await dispatch(loadSharedEvents()).unwrap();
                         
-                        // Если shared events успешно загружены, считаем это успехом
-                        // Пользователь уже является участником события
                         setStatus("success");
                         setMessage("You are already a member of this event. Redirecting to your calendar...");
                         
@@ -131,8 +103,6 @@ export default function EventInvitePage() {
                         }, 2000);
                         return;
                     } catch (loadErr) {
-                        // Если загрузка shared events не удалась, это реальная ошибка
-                        // Токен действительно невалидный или протухший
                         setStatus("error");
                         setMessage(errorMessage || "The invitation link is invalid or has expired");
                         console.error(`Event invite ${action} error:`, err);
@@ -140,16 +110,10 @@ export default function EventInvitePage() {
                     }
                 }
 
-                // Обработка FORBIDDEN (403): проверяем конкретное сообщение
-                // Некоторые 403 ошибки могут означать, что пользователь уже участник (например,
-                // "No pending invite found for this user" - приглашение уже было обработано ранее)
                 if (statusCode === 403) {
                     const messageLower = errorMessage?.toLowerCase() || "";
-                    // Если сообщение говорит о том, что нет pending invite или пользователь уже участник,
-                    // проверяем через загрузку shared events, чтобы подтвердить успешное состояние
                     if (messageLower.includes("no pending invite") || messageLower.includes("already a member")) {
                         try {
-                            // Проверяем через загрузку shared events
                             await dispatch(loadSharedEvents()).unwrap();
                             setStatus("success");
                             setMessage("You are already a member of this event. Redirecting to your calendar...");
@@ -158,7 +122,6 @@ export default function EventInvitePage() {
                             }, 2000);
                             return;
                         } catch (loadErr) {
-                            // Если не удалось загрузить shared events, показываем ошибку
                             setStatus("error");
                             setMessage(errorMessage || `Failed to ${action} event invitation`);
                             console.error(`Event invite ${action} error:`, err);
@@ -167,8 +130,6 @@ export default function EventInvitePage() {
                     }
                 }
 
-                // Для всех остальных ошибок (401, 404, 500 и т.д.) показываем стандартное сообщение об ошибке
-                // Это реальные ошибки: невалидный токен авторизации, событие не найдено, серверная ошибка и т.п.
                 setStatus("error");
                 setMessage(errorMessage || `Failed to ${action} event invitation`);
                 console.error(`Event invite ${action} error:`, err);

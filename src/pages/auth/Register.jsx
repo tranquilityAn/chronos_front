@@ -16,7 +16,6 @@ export default function Register() {
   const onSubmit = async (e) => {
     e.preventDefault();
     
-    // Валидация и нормализация email
     const trimmedEmail = (email || '').trim();
     const trimmedPassword = (password || '').trim();
     

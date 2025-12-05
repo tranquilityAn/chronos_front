@@ -1,6 +1,5 @@
 @import url("./global.css");
 
-/* ===== BASE LAYOUT ===== */
 .calendar-page {
     display: flex;
     min-height: 100vh;
@@ -9,7 +8,6 @@
     color: var(--main-text-color);
 }
 
-/* ===== HEADERBAR ===== */
 .headerbar {
     height: 50px;
     background: var(--alt-main-color);
@@ -27,7 +25,6 @@
     color: var(--second-color);
 }
 
-/* Заглушки для майбутнього */
 .headerbar__left,
 .headerbar__center,
 .headerbar__right {
@@ -100,7 +97,6 @@
     color: var(--main-text-color);
 }
 
-/* Navigation */
 .headerbar__nav {
     display: flex;
     align-items: center;
@@ -145,7 +141,6 @@
     color: var(--main-color);
 }
 
-/* ===== MAIN AREA ===== */
 .calendar-main {
     flex: 1;
     display: flex;
@@ -155,7 +150,6 @@
     overflow: hidden;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
     width: 250px;
     background: var(--alt-main-color);
@@ -167,7 +161,6 @@
     
 }
 
-/* Назва сервісу зверху */
 .sidebar__brand-title {
     font-size: 28px;
     font-weight: 800;
@@ -175,7 +168,6 @@
    
 }
 
-/* Секції */
 .sidebar__section {
     margin-top: 20px;
     flex: 1;
@@ -233,7 +225,6 @@
     font-weight: bold;
 }
 
-/* списки календарів */
 .sidebar__list {
     margin-top: 10px;
     list-style: none;
@@ -336,7 +327,6 @@
     font-weight: 500;
 }
 
-/* кнопки внизу */
 .sidebar__footer {
     display: flex;
     flex-direction: row;
@@ -382,7 +372,6 @@
     z-index: 1;
 }
 
-/* ===== CALENDAR GRID ===== */
 .cal-grid {
     flex: 1;
     display: flex;
@@ -391,7 +380,6 @@
     gap: 4px;
 }
 
-/* Дні тижня */
 .cal-grid__weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -410,7 +398,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Сітка */
 .cal-grid__cells {
     flex: 1;
     min-height: 0;
@@ -422,7 +409,6 @@
     align-items: stretch;
 }
 
-/* Клітинка */
 .cal-grid__cell {
     height: 100%;
     width: 100%;
@@ -441,7 +427,6 @@
 .cal-grid__cell:hover {
     background: rgba(237, 233, 134, 0.15);
     border-color: rgba(237, 233, 134, 0.4);
-    /* border-width: 2px; */
     transform: scale(1.01);
     box-shadow: 0 2px 8px rgba(237, 233, 134, 0.2);
 }
@@ -464,7 +449,6 @@
     box-shadow: 0 0 8px rgba(237, 233, 134, 0.3);
 }
 
-/* Сьогоднішній день */
 .cal-grid__cell--today {
     background: rgba(237, 233, 134, 0.12);
 }
@@ -477,7 +461,6 @@
     box-shadow: 0 2px 8px rgba(237, 233, 134, 0.3);
 }
 
-/* Цифра дня */
 .cal-grid__cell-date {
     font-size: 14px;
     font-weight: 600;
@@ -504,7 +487,6 @@
     color: var(--main-color);
 }
 
-/* Івенти */
 .cal-grid__cell-events {
     margin-top: 5px;
     display: flex;
@@ -536,7 +518,6 @@
     outline-offset: 1px;
 }
 
-/* Типы событий */
 .cal-grid__event-type {
     font-size: 10px;
     font-weight: 700;
@@ -600,9 +581,6 @@
     text-decoration: underline;
 }
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
-
-/* Tablet: 768px - 1199px */
 @media (max-width: 1199px) {
     .sidebar {
         width: 220px;
@@ -618,7 +596,6 @@
     }
 }
 
-/* Mobile: < 768px */
 @media (max-width: 767px) {
     .calendar-page {
         flex-direction: column;
@@ -628,7 +605,6 @@
         width: 100%;
     }
 
-    /* Sidebar becomes fixed overlay on mobile */
     .sidebar {
         position: fixed;
         top: 0;
@@ -659,7 +635,6 @@
         display: block;
     }
 
-    /* HeaderBar adjustments */
     .headerbar {
         padding: 0 12px;
         height: 50px;
@@ -698,7 +673,6 @@
         border-color: var(--second-color);
     }
 
-    /* Calendar Grid adjustments */
     .cal-grid {
         padding: 8px 12px;
         gap: 3px;
@@ -745,7 +719,6 @@
     }
 }
 
-/* Desktop: hide burger button */
 @media (min-width: 768px) {
     .headerbar__burger {
         display: none;
