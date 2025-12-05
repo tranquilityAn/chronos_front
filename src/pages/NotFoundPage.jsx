@@ -46,12 +46,6 @@ export default function NotFoundPage() {
             Back to calendar
           </Link>
         </div>
-
-        <audio
-          ref={audioRef}
-          src="/404.mp3"
-          className="notfound-audio"
-        />
       </main>
     </div>
   );
