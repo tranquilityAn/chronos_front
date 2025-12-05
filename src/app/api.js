@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/',
 });
 
 api.interceptors.request.use((config) => {
@@ -18,7 +18,9 @@ api.interceptors.response.use(
         const status = err?.response?.status;
         if (status === 401) {
             localStorage.removeItem('token');
-            // TODO: redirect на login
+            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(err);
     }

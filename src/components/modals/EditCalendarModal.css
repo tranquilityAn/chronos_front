@@ -1,0 +1,208 @@
+@import url('../../styles/global.css');
+
+.calendar-delete-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.calendar-delete-modal {
+    background: var(--alt-main-color);
+    border-radius: 6px;
+    padding: 32px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-delete-modal__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--second-color);
+    margin: 0 0 16px 0;
+}
+
+.calendar-delete-modal__text {
+    font-size: 16px;
+    color: var(--main-text-color);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.calendar-delete-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.calendar-delete-modal__btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: inherit;
+    background: transparent;
+    color: var(--main-text-color);
+    border: 1px solid rgba(237, 233, 134, 0.3);
+}
+
+.calendar-delete-modal__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calendar-delete-modal__btn:hover:not(:disabled) {
+    background: rgba(237, 233, 134, 0.1);
+    border-color: var(--second-color);
+    transform: translateY(-2px);
+}
+
+.calendar-delete-modal__btn--danger {
+    background: transparent;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.calendar-delete-modal__btn--danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: var(--error-color);
+    color: var(--main-text-color);
+}
+
+.calendar-delete-modal__btn--danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.calendar-remove-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.calendar-remove-modal {
+    background: var(--alt-main-color);
+    border-radius: 6px;
+    padding: 32px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-remove-modal__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--second-color);
+    margin: 0 0 16px 0;
+}
+
+.calendar-remove-modal__text {
+    font-size: 16px;
+    color: var(--main-text-color);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.calendar-remove-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.calendar-remove-modal__btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: inherit;
+    background: transparent;
+    color: var(--main-text-color);
+    border: 1px solid rgba(237, 233, 134, 0.3);
+}
+
+.calendar-remove-modal__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calendar-remove-modal__btn:hover:not(:disabled) {
+    background: rgba(237, 233, 134, 0.1);
+    border-color: var(--second-color);
+    transform: translateY(-2px);
+}
+
+.calendar-remove-modal__btn--danger {
+    background: transparent;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.calendar-remove-modal__btn--danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: var(--error-color);
+    color: var(--main-text-color);
+}
+
+.calendar-remove-modal__btn--danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-form__meta-value {
+    font-size: 14px;
+    color: var(--main-text-color);
+    font-weight: 400;
+    opacity: 0.6;
+}
+
+.modal-form__color-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.modal-form__color-preview {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--main-text-color);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.modal-form__color-display span {
+    font-size: 14px;
+    color: var(--main-text-color);
+}
+
+.modal-form__group--color {
+    margin-top: 16px;
+}
+
+.modal-form__group--meta {
+    margin-top: 16px;
+}
+

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-// важное: используем тот же файл стилей, что и логин
-import "../../styles/Login.css";
-import { register } from "../../features/auth/authSlice";
+import { register as registerAction } from "../../features/auth/authSlice";
+import styles from "../../styles/Auth.module.css";
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -16,37 +15,51 @@ export default function Register() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    
+    const trimmedEmail = (email || '').trim();
+    const trimmedPassword = (password || '').trim();
+    
+    if (!trimmedEmail) {
+      alert("Email не может быть пустым");
+      return;
+    }
+    
+    if (!trimmedPassword) {
+      alert("Пароль не может быть пустым");
+      return;
+    }
+    
     if (password !== password2) {
       alert("Пароли не совпадают");
       return;
     }
+    
     try {
-      await dispatch(register({ email, password })).unwrap();
-      // если после регистрации сразу выдаётся токен — можно вести на главную
-      // иначе поменяй на navigate("/login")
+      await dispatch(registerAction({ email: trimmedEmail, password })).unwrap();
       navigate("/");
     } catch (err) {
-      console.error(err);
+      alert(err?.message || err?.payload || "Ошибка регистрации");
     }
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <label>Houdini</label>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <span className={styles.brand}>Houdini</span>
       </div>
 
-      <div className="container-main">
-        <div className="container-image"></div>
+      <div className={styles.main}>
+        <div className={styles.image} />
 
-        <div className="container-login">
-          <div className="container-second-color">
-            <h2>Sign up</h2>
+        <div className={styles.panel}>
+          <div className={styles.pad}>
+            <h2 className={styles.title}>Sign up</h2>
 
-            <form onSubmit={onSubmit}>
-              <div className="container-input">
-                <label className="label-input">Email</label>
+            <form className={styles.form} onSubmit={onSubmit}>
+              <div className={styles.group}>
+                <label className={styles.labelX}>Email</label>
                 <input
+                  className={styles.inputX}
                   type="email"
                   placeholder="you@domain.com"
                   required
@@ -56,9 +69,10 @@ export default function Register() {
                 />
               </div>
 
-              <div className="container-input">
-                <label className="label-input">Password</label>
+              <div className={styles.group}>
+                <label className={styles.labelX}>Password</label>
                 <input
+                  className={styles.inputX}
                   type="password"
                   placeholder="••••••••"
                   required
@@ -68,9 +82,10 @@ export default function Register() {
                 />
               </div>
 
-              <div className="container-input">
-                <label className="label-input">Confirm password</label>
+              <div className={styles.group}>
+                <label className={styles.labelX}>Confirm password</label>
                 <input
+                  className={styles.inputX}
                   type="password"
                   placeholder="••••••••"
                   required
@@ -78,23 +93,22 @@ export default function Register() {
                   value={password2}
                   onChange={(e) => setPassword2(e.target.value)}
                 />
-                <label id="ny-eto">
+                <span className={styles.hint}>
                   Already have an account?{" "}
-                  <Link to="/login">Sign in</Link>
-                </label>
+                  <Link className={styles.linkX} to="/login">Sign in</Link>
+                </span>
               </div>
 
-              <button type="submit" disabled={status === "loading"}>
+              <button className={styles.buttonX} type="submit" disabled={status === "loading"}>
                 {status === "loading" ? "Registering…" : "Register"}
               </button>
             </form>
 
             {error && <p style={{ color: "crimson" }}>Ошибка: {error}</p>}
 
-            <label id="ne-eto">
-              By signing up, you agree to the{" "}
-              <a href="#">Terms</a>.
-            </label>
+            <span className={styles.fineprint}>
+              By signing up, you agree to the <a className={styles.linkX} href="#">Terms</a>.
+            </span>
           </div>
         </div>
       </div>

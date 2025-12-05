@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import "../../styles/Login.css";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import styles from "../../styles/Auth.module.css";
 import { login } from "../../features/auth/authSlice";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { status, error, token } = useSelector((s) => s.auth);
 
   const [email, setEmail] = useState("");
@@ -16,65 +17,76 @@ export default function Login() {
     e.preventDefault();
     try {
       await dispatch(login({ email, password })).unwrap();
-      // если нужен редирект после логина:
-      navigate("/");
+      
+      const redirectUrl = searchParams.get("redirect");
+      if (redirectUrl) {
+        navigate(decodeURIComponent(redirectUrl), { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
-      // error уже в стейте, но и локально покажем
-      console.error(err);
     }
   };
 
   return (
-    <div class="container">
-      <div class="header">
-        <label>Houdini</label>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <span className={styles.brand}>Houdini</span>
       </div>
-        <div class="container-main">
-          <div class="container-image"></div>
-            <div class ="container-login">
-              <div class="container-second-color">
-                <h2>Sign in</h2>
 
-                <form onSubmit={onSubmit}>
-                    <div class="container-input">
-                    <label  class="label-input">Email</label>
-                      <input
-                          type="email"
-                          placeholder="user@example.com"
-                          required
-                          autoComplete="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
+      <div className={styles.main}>
+        <div className={styles.image} />
 
-                    <div class="container-input">
-                      <label class="label-input">Password</label>
-                      <input
-                          type="password"
-                          placeholder="Enter your password"
-                          required
-                          autoComplete="current-password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                      />
-                      <label id="ny-eto">Forgot your password? <Link to="/register">Change it.</Link></label>
-                    </div>
-                    
-                    <button type="submit" disabled={status === "loading"}>
-                    {status === "loading" ? "Logging in…" : "Sign in"}
-                    </button>
-                </form>
+        <div className={styles.panel}>
+          <div className={styles.pad}>
+            <h2 className={styles.title}>Sign in</h2>
 
-                {error && <p style={{ color: "crimson" }}>Error: {error}</p>}
-                {token && <p style={{ color: "green" }}></p>}
-
-                <label id="ne-eto">
-                    No account? <Link to="/register">Register</Link>
-                </label>
+            <form className={styles.form} onSubmit={onSubmit}>
+              <div className={styles.group}>
+                <label className={styles.labelX}>Email</label>
+                <input
+                  className={styles.inputX}
+                  type="email"
+                  placeholder="user@example.com"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-            </div>
+
+              <div className={styles.group}>
+                <label className={styles.labelX}>Password</label>
+                <input
+                  className={styles.inputX}
+                  type="password"
+                  placeholder="Enter your password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <span className={styles.hint}>
+                  Forgot your password?{" "}
+                  <Link className={styles.linkX} to="/register">Change it.</Link>
+                </span>
+              </div>
+
+              <button className={styles.buttonX} type="submit" disabled={status === "loading"}>
+                {status === "loading" ? "Logging in…" : "Sign in"}
+              </button>
+            </form>
+
+            {error && <p style={{ color: "crimson" }}>Error: {error}</p>}
+            {token && <p style={{ color: "green" }}></p>}
+
+            <span className={styles.fineprint}>
+              No account?{" "}
+              <Link className={styles.linkX} to="/register">Register</Link>
+            </span>
           </div>
+        </div>
+      </div>
     </div>
   );
 }
